@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { THEMES } from "../constants";
+import { THEMES } from "../constants/themes.js";
 import { useThemeStore } from "../store/useThemeStore";
 import { Send, ChevronRight, Check, Image } from "lucide-react";
 
