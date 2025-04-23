@@ -9,6 +9,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  isSidebarOpen: window.innerWidth >= 1024, // Open by default on large screens
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -33,6 +34,7 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: false });
     }
   },
+
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     try {
@@ -65,4 +67,5 @@ export const useChatStore = create((set, get) => ({
   },
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
 }));
