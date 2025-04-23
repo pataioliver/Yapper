@@ -38,7 +38,6 @@ const MessageInput = () => {
         image: imagePreview,
       });
 
-      // Clear form
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -48,32 +47,36 @@ const MessageInput = () => {
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full bg-gradient-to-t from-base-200/30 to-base-100">
       {imagePreview && (
-        <div className="mb-3 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+        <div
+          className="mb-3 flex items-center gap-2 animate-in fade-in duration-400"
+        >
           <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+              className="w-20 h-20 object-cover rounded-lg border border-primary/20 transition-transform duration-300 hover:scale-105 hover:shadow-md"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center transition-transform hover:scale-110"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-primary/20"
               type="button"
             >
-              <X className="size-3" />
+              <X className="size-3 text-primary" />
             </button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+      <form
+        onSubmit={handleSendMessage}
+        className="flex items-center gap-2 bg-base-100 rounded-lg p-2 shadow-md shadow-primary/10"
+      >
         <div className="flex-1 flex gap-2 items-center">
           <input
             type="text"
-            className="w-full input input-bordered rounded-lg input-md"
+            className="w-full input input-bordered rounded-lg input-md transition-all duration-300 focus:ring-2 focus:ring-primary focus:bg-base-100/90 hover:shadow-md hover:shadow-primary/20"
             placeholder="Type a message..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -90,7 +93,7 @@ const MessageInput = () => {
             type="button"
             className={`btn btn-md btn-circle ${
               imagePreview ? "text-emerald-500" : "text-zinc-400"
-            } transition-transform hover:scale-110 active:scale-95`}
+            } transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-md hover:shadow-primary/20`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -98,10 +101,10 @@ const MessageInput = () => {
         </div>
         <button
           type="submit"
-          className="btn btn-md btn-circle transition-transform hover:scale-110 active:scale-95"
+          className="btn btn-md btn-circle transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-md hover:shadow-primary/20"
           disabled={!text.trim() && !imagePreview}
         >
-          <Send size={22} />
+          <Send size={22} className="text-primary" />
         </button>
       </form>
     </div>
