@@ -12,3 +12,21 @@ export const generateToken = (userId, res) => {
         secure: process.env.NODE_ENV === 'production' ? true : false,
     });
 }
+
+// Generate a short-lived token for email verification
+export const generateEmailVerificationToken = (email, verificationCode) => {
+    return jwt.sign(
+        { email, verificationCode },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" } // Token expires in 15 minutes
+    );
+};
+
+// Verify the email verification token
+export const verifyEmailVerificationToken = (token) => {
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        throw new Error("Invalid or expired verification token");
+    }
+};
