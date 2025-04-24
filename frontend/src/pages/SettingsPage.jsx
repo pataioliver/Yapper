@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { THEMES } from "../constants/themes.js";
 import { useThemeStore } from "../store/useThemeStore";
-import { Send, ChevronRight, Check, Image } from "lucide-react";
+import { Send, ChevronRight, Check, Image, Bell } from "lucide-react";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -16,10 +16,55 @@ const SettingsPage = () => {
     setTheme(previewTheme);
   };
 
+  const handleEnableNotifications = async () => {
+    if (!("Notification" in window)) {
+      alert("This browser does not support notifications.");
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      alert("Notifications enabled!");
+      // Register the service worker for push notifications
+      registerServiceWorkerForPush();
+    } else if (permission === "denied") {
+      alert("Notifications are disabled. Please enable them in your browser settings.");
+    }
+  };
+
+  const registerServiceWorkerForPush = async () => {
+    if ("serviceWorker" in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register("/service-worker.js");
+        console.log("Service Worker registered for push notifications:", registration);
+      } catch (error) {
+        console.error("Service Worker registration failed:", error);
+      }
+    } else {
+      console.error("Service Worker is not supported in this browser.");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-base-200 to-base-300/70 animate-in fade-in duration-600 flex items-center justify-center px-4 pt-20 pb-8">
       <div className="w-full max-w-5xl bg-base-100 rounded-lg p-6 shadow-lg shadow-primary/20 transition-all duration-400 hover:shadow-xl">
         <div className="space-y-6">
+
+          {/* Add the notification button */}
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+              Notifications
+            </h3>
+            <button
+              onClick={handleEnableNotifications}
+              className="btn btn-primary btn-sm flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-primary/20"
+            >
+              <Bell size={18} />
+              Enable Notifications
+            </button>
+          </div>
+
+
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
               Theme
