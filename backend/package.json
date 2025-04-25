@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1",
     "nodemailer": "^6.10.1",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "yapper": "file:.."
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
