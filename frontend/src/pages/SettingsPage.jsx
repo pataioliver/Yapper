@@ -4,8 +4,13 @@ import { useThemeStore } from "../store/useThemeStore";
 import { Send, ChevronRight, Check, Image, Bell } from "lucide-react";
 
 const PREVIEW_MESSAGES = [
-  { id: 1, content: "Hey! How's it going?", isSent: false },
-  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+  { id: 1, content: "Hey! How's it going?", isSent: false, senderId: "user1", reactions: [{ label: "Like", userId: "user2" }], replyToId: null },
+  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true, senderId: "user2", reactions: [
+    { label: "Love", userId: "user1" },
+    { label: "Smile", userId: "user1" },
+    { label: "Sad", userId: "user1" },
+    { label: "Wow", userId: "user1" },
+  ], replyToId: "1" },
 ];
 
 const SettingsPage = () => {
@@ -25,7 +30,6 @@ const SettingsPage = () => {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       alert("Notifications enabled!");
-      // Register the service worker for push notifications
       registerServiceWorkerForPush();
     } else if (permission === "denied") {
       alert("Notifications are disabled. Please enable them in your browser settings.");
@@ -45,12 +49,18 @@ const SettingsPage = () => {
     }
   };
 
+  // Mock auth user for preview
+  const authUser = { _id: "user2", fullName: "You" };
+  const selectedUser = { _id: "user1", fullName: "John Doe" };
+
+  const getQuotedMessage = (replyToId) => {
+    return PREVIEW_MESSAGES.find((msg) => msg.id === replyToId);
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-base-200 to-base-300/70 animate-in fade-in duration-600 flex items-center justify-center px-4 pt-20 pb-8">
       <div className="w-full max-w-5xl bg-base-100 rounded-lg p-6 shadow-lg shadow-primary/20 transition-all duration-400 hover:shadow-xl">
         <div className="space-y-6">
-
-          {/* Add the notification button */}
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
               Notifications
@@ -63,7 +73,6 @@ const SettingsPage = () => {
               Enable Notifications
             </button>
           </div>
-
 
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
@@ -119,7 +128,6 @@ const SettingsPage = () => {
             className="flex-1 flex flex-col overflow-auto bg-base-100 rounded-xl shadow-md shadow-primary/20"
             data-theme={previewTheme}
           >
-            {/* Chat Header */}
             <div className="p-2.5 border-b border-base-300 h-14 flex items-center bg-base-100 shadow-sm">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3">
@@ -147,38 +155,64 @@ const SettingsPage = () => {
               </div>
             </div>
 
-            {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {PREVIEW_MESSAGES.map((message) => (
-                <div
-                  key={message.id}
-                  className={`chat ${message.isSent ? "chat-end" : "chat-start"}`}
-                >
-                  <div className="chat-image avatar">
-                    <div className="size-10 rounded-full border-2 border-primary/20">
-                      <img src="/avatar.png" alt="profile pic" />
+              {PREVIEW_MESSAGES.map((message) => {
+                const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
+                const isOwnMessage = message.senderId === authUser._id;
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`chat ${isOwnMessage ? "chat-end" : "chat-start"}`}
+                  >
+                    <div className="chat-image avatar">
+                      <div className="size-10 rounded-full border-2 border-primary/20">
+                        <img src="/avatar.png" alt="profile pic" />
+                      </div>
+                    </div>
+                    <div className="chat-header mb-1">
+                      <time className="text-xs opacity-50 ml-1">
+                        12:00 PM
+                      </time>
+                    </div>
+                    <div
+                      className={`
+                        chat-bubble flex flex-col
+                        ${isOwnMessage ? "bg-primary/20" : "bg-base-200"}
+                      `}
+                    >
+                      {quotedMessage && (
+                        <div className="mb-2 p-2 bg-base-300/50 rounded-lg border-l-4 border-primary/50">
+                          <p className="text-xs text-base-content/70">
+                            {quotedMessage.senderId === authUser._id ? "You" : selectedUser.fullName}
+                          </p>
+                          <p className="text-sm truncate max-w-[200px]">
+                            {quotedMessage.content || (quotedMessage.image && "Image")}
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+                        {message.content}
+                      </p>
+                      {message.reactions && message.reactions.length > 0 && (
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          {message.reactions.map((reaction, idx) => (
+                            <span key={idx} className="text-xs">
+                              {reaction.label === "Like" ? "👍" :
+                               reaction.label === "Love" ? "❤️" :
+                               reaction.label === "Smile" ? "😄" :
+                               reaction.label === "Sad" ? "😢" :
+                               reaction.label === "Wow" ? "😮" : ""}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="chat-header mb-1">
-                    <time className="text-xs opacity-50 ml-1">
-                      12:00 PM
-                    </time>
-                  </div>
-                  <div
-                    className={`
-                      chat-bubble flex flex-col
-                      ${message.isSent ? "bg-primary/20" : "bg-base-200"}
-                    `}
-                  >
-                    <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                      {message.content}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* Chat Input */}
             <div className="p-4 w-full bg-base-100">
               <div className="flex items-center gap-2 bg-base-100 rounded-lg p-2 shadow-md shadow-primary/10">
                 <input
