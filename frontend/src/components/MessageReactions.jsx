@@ -22,21 +22,18 @@ const MessageReactions = ({ messageId, onReact, isOwnMessage }) => {
       const rect = picker.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
 
-      // Adjust horizontal position: for own messages, show on the right; for others, show on the left
       if (isOwnMessage) {
         setPickerPosition("right");
       } else {
         setPickerPosition("left");
       }
 
-      // Prevent overflow by adjusting if necessary
       if (pickerPosition === "right" && rect.right > viewportWidth) {
         setPickerPosition("left");
       } else if (pickerPosition === "left" && rect.left < 0) {
         setPickerPosition("right");
       }
 
-      // Adjust vertical position: if there's no space at the bottom, move to the top
       const viewportHeight = window.innerHeight;
       if (rect.bottom > viewportHeight) {
         picker.classList.add("top-full", "mt-2");
@@ -62,20 +59,16 @@ const MessageReactions = ({ messageId, onReact, isOwnMessage }) => {
       {showPicker && (
         <div
           ref={pickerRef}
-          className={`
-            absolute z-20 p-2 bg-base-100 rounded-lg shadow-md shadow-primary/20 animate-in zoom-in-95 duration-300
-            ${pickerPosition === "right" ? "right-0" : "left-0"}
-            bottom-full mb-2
-          `}
-          onMouseLeave={() => setShowPicker(false)}
+          className={`absolute z-20 p-2 bg-base-100 rounded-lg shadow-md shadow-tertiary/20 ${pickerPosition === "right" ? "right-0" : "left-0"} bottom-full mb-2 animate-slide-in transition-opacity duration-700 ease-in-out`}
         >
           <div className="flex gap-2">
-            {reactions.map((reaction) => (
+            {reactions.map((reaction, idx) => (
               <button
                 key={reaction.emoji}
                 onClick={() => handleReaction(reaction)}
-                className="p-1 hover:bg-primary/20 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-primary/20 tooltip"
+                className="p-1 hover:bg-gradient-primary hover:shadow-lg hover:shadow-quaternary/50 rounded-full tooltip transition-all duration-700 ease-in-out"
                 data-tip={reaction.emoji}
+                style={{ animationDelay: `${idx * 0.1}s` }}
               >
                 {reaction.icon}
               </button>
@@ -85,9 +78,9 @@ const MessageReactions = ({ messageId, onReact, isOwnMessage }) => {
       )}
       <button
         onClick={() => setShowPicker(!showPicker)}
-        className="p-1.5 bg-base-100 rounded-full shadow-md hover:bg-primary/20 hover:scale-110 transition-all duration-300 animate-pulse"
+        className="p-1.5 bg-base-100 rounded-full shadow-md hover:bg-gradient-primary hover:shadow-lg hover:shadow-tertiary/50 transition-all duration-700 ease-in-out"
       >
-        <SmilePlus size={16} className="text-base-content/70 hover:text-primary" />
+        <SmilePlus size={16} className="text-quaternary" />
       </button>
     </div>
   );
