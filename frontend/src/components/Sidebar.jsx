@@ -5,7 +5,15 @@ import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users, ChevronLeft } from "lucide-react";
 
 const Sidebar = () => {
-  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading, isSidebarOpen, setSidebarOpen } = useChatStore();
+  const {
+    getUsers,
+    users,
+    selectedUser,
+    setSelectedUser,
+    isUsersLoading,
+    isSidebarOpen,
+    setSidebarOpen,
+  } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,7 +22,10 @@ const Sidebar = () => {
     getUsers();
   }, [getUsers]);
 
-  const filteredUsers = showOnlineOnly ? users.filter((user) => onlineUsers.includes(user._id)) : users;
+  const filteredUsers = showOnlineOnly
+    ? users.filter((user) => onlineUsers.includes(user._id))
+    : users;
+
   const filteredAndSearchedUsers = filteredUsers.filter((user) =>
     user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -53,7 +64,9 @@ const Sidebar = () => {
           <div className="p-2.5 rounded-full bg-quaternary/15 backdrop-blur-2xl shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale">
             <Users className="size-7 text-tertiary" />
           </div>
-          <span className="font-semibold text-lg text-base-content animate-glassMorph">Contacts</span>
+          <span className="font-semibold text-lg text-base-content animate-glassMorph">
+            Contacts
+          </span>
         </div>
         {selectedUser && (
           <button
@@ -65,6 +78,7 @@ const Sidebar = () => {
           </button>
         )}
       </div>
+
       {isSidebarOpen && (
         <div className="p-4 border-b border-quaternary/20 animate-glassMorph">
           <div className="mt-3">
@@ -84,12 +98,17 @@ const Sidebar = () => {
                 onChange={(e) => setShowOnlineOnly(e.target.checked)}
                 className="checkbox checkbox-sm border-quaternary/50 animate-glassMorph"
               />
-              <span className="text-base text-base-content animate-glassMorph">Show online only</span>
+              <span className="text-base text-base-content animate-glassMorph">
+                Show online only
+              </span>
             </label>
-            <span className="text-sm text-quaternary/80 animate-glassMorph">({onlineUsers.length - 1} online)</span>
+            <span className="text-sm text-quaternary/80 animate-glassMorph">
+              ({onlineUsers.length - 1} online)
+            </span>
           </div>
         </div>
       )}
+
       <div className="overflow-y-auto w-full py-3">
         {filteredAndSearchedUsers.map((user, idx) => (
           <button
@@ -99,9 +118,13 @@ const Sidebar = () => {
               if (window.innerWidth < 1024) setSidebarOpen(false);
             }}
             className={`
-              w-full p-3 flex items-center gap-4 hover:bg-quaternary/15 backdrop-blur-2xl
-              ${selectedUser?._id === user._id ? "bg-tertiary/15 ring-1 ring-primary/30 shadow-[0_0_20px_rgba(255,255,255,0.1)]" : ""}
-              transition-all duration-500 animate-glassMorph
+              w-full p-3 flex items-center gap-4 transition-all duration-500 animate-glassMorph
+              backdrop-blur-xl border border-white/10 hover:border-white/20
+              ${
+                selectedUser?._id === user._id
+                  ? "bg-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.2)] ring-2 ring-primary/40"
+                  : "hover:bg-white/5"
+              }
             `}
             style={{ animationDelay: `${idx * 0.05}s` }}
           >
@@ -116,7 +139,9 @@ const Sidebar = () => {
               )}
             </div>
             <div className="flex-1 text-left overflow-hidden">
-              <div className="font-semibold text-lg text-base-content animate-glassMorph">{user.fullName}</div>
+              <div className="font-semibold text-lg text-base-content animate-glassMorph">
+                {user.fullName}
+              </div>
               <div className="text-base text-quaternary/80 animate-glassMorph">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>

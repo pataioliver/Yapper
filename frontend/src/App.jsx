@@ -73,17 +73,34 @@ const App = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-base-100 animate-glassMorphPulse ${fontClass}`} data-theme={theme}>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
-      </Routes>
-      <Toaster toastOptions={{ style: { background: 'var(--base-100)', color: 'var(--base-content)', borderRadius: '1rem', border: '1px solid var(--base-content)' } }} />
+    <div className="relative min-h-screen">
+      {/* Background gradient - fixed and non-scrolling */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-base-200 via-secondary/20 to-primary/10 opacity-95" />
+      
+      {/* Content area - scrollable */}
+      <div className="relative min-h-screen w-full backdrop-blur-lg">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+          <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+          <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
+          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        </Routes>
+        <Toaster 
+          toastOptions={{ 
+            style: { 
+              background: 'var(--base-100)', 
+              color: 'var(--base-content)', 
+              borderRadius: '1rem', 
+              border: '1px solid var(--base-content/20)',
+              boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(5px)'
+            } 
+          }} 
+        />
+      </div>
     </div>
   );
 };

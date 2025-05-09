@@ -13,7 +13,7 @@ const NoChatSelected = () => {
       <div className="max-w-md text-center space-y-6 relative">
         <div className="relative z-10">
           <div className="absolute inset-0 bg-gradient-radial from-secondary/15 to-transparent rounded-full blur-2xl animate-pulseGlow opacity-50" />
-          <div className="relative w-16 h-16 mx-auto rounded-2xl bg-secondary/15 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-500 animate-scaleIn" style={{ animationDelay: "0.05s" }}>
+          <div className="relative w-16 h-16 mx-auto rounded-2xl bg-secondary/85 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-500 animate-scaleIn" style={{ animationDelay: "0.05s" }}>
             <MessageSquare className="w-8 h-8 text-secondary-content" />
           </div>
         </div>

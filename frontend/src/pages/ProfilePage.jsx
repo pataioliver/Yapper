@@ -19,7 +19,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 bg-gradient-to-b from-base-200/85 to-quaternary/20 backdrop-blur-xl animate-glassMorphPulse">
+    <div className="min-h-screen pt-20 backdrop-blur-xl animate-glassMorphPulse">
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="bg-base-100/85 backdrop-blur-xl rounded-2xl p-6 space-y-8 shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all duration-500 animate-glassMorphPulse border border-base-content/20">
           <div className="text-center animate-popIn">

@@ -39,7 +39,7 @@ const VerifyEmailPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-base-200/85 to-quaternary/20 backdrop-blur-xl animate-glassMorphPulse">
+    <div className="min-h-screen flex items-center justify-center backdrop-blur-xl animate-glassMorphPulse">
       <div className="w-full max-w-lg bg-base-100/85 backdrop-blur-xl rounded-2xl p-10 shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all duration-500 animate-glassMorphPulse border border-base-content/20">
         <div className="text-center mb-10 animate-popIn">
           <div className="flex flex-col items-center gap-3">
