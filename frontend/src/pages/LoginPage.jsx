@@ -112,7 +112,14 @@ const LoginPage = () => {
                 Create account
               </Link>
             </p>
+            <div className="mt-4 text-sm text-gray-600">
+              <Link to="/forgot-password" className="text-primary hover:underline">
+                Forgot your password?
+              </Link>
+            </div>
           </div>
+
+
         </div>
       </div>
 
