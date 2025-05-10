@@ -88,17 +88,56 @@ const App = () => {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
         </Routes>
-        <Toaster 
-          toastOptions={{ 
-            style: { 
-              background: 'var(--base-100)', 
-              color: 'var(--base-content)', 
-              borderRadius: '1rem', 
-              border: '1px solid var(--base-content/20)',
-              boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-              backdropFilter: 'blur(5px)'
-            } 
-          }} 
+        <Toaster
+          position="top-center"
+          containerStyle={{
+            position: "fixed",
+            top: "20px",
+            left: "0",
+            right: "0",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+          toastOptions={{
+            style: {
+              maxWidth: "400px",
+              width: "fit-content",
+              padding: "16px 24px",
+              borderRadius: "12px",
+              background: "hsl(var(--b1))",
+              color: "hsl(var(--bc))",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              border: "1px solid hsl(var(--bc) / 0.1)",
+              fontSize: "16px",
+              textAlign: "center",
+              backdropFilter: "blur(8px)",
+            },
+            success: {
+              icon: "✅",
+              style: {
+                background: "hsl(var(--su))",
+                color: "hsl(var(--suc))",
+              },
+            },
+            error: {
+              icon: "❌",
+              style: {
+                background: "hsl(var(--er))",
+                color: "hsl(var(--erc))",
+              },
+            },
+            loading: {
+              icon: "⏳",
+              style: {
+                background: "hsl(var(--wa))",
+                color: "hsl(var(--wac))",
+              },
+            },
+            duration: 5000,
+          }}
         />
       </div>
     </div>

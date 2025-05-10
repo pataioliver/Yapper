@@ -10,6 +10,7 @@ export default {
         slideIn: "slideIn 0.7s ease-in-out",
         slideDown: "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         pulseGlow: "pulseGlow 1.5s ease-in-out infinite",
+        pulseGlowDark: "pulseGlowDark 1.5s ease-in-out infinite",
         scaleIn: "scaleIn 0.8s ease-out",
         glassMorph: "glassMorph 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         glassMorphPulse: "glassMorphPulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
@@ -18,6 +19,7 @@ export default {
         gentleBounce: "gentleBounce 2s ease-in-out infinite",
         underlineGrow: "underlineGrow 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         subtleScale: "subtleScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+        sleekThemeSelect: "sleekThemeSelect 1s cubic-bezier(0.22, 1, 0.36, 1)",
       },
       keyframes: {
         fadeIn: {
@@ -33,8 +35,12 @@ export default {
           "100%": { opacity: 1, transform: "translateY(0)" },
         },
         pulseGlow: {
-          "0%, 100%": { boxShadow: "0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2)" },
-          "50%": { boxShadow: "0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.3)" },
+          "0%, 100%": { boxShadow: "0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)" },
+        },
+        pulseGlowDark: {
+          "0%, 100%": { boxShadow: "0 0 10px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 0, 0, 0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 0, 0, 0.4)" },
         },
         scaleIn: {
           "0%": { opacity: 0, transform: "scale(0.95)" },
@@ -57,6 +63,11 @@ export default {
           "0%": { transform: "scale(0.8)", opacity: 0 },
           "50%": { transform: "scale(1.1)" },
           "100%": { transform: "scale(1)", opacity: 1 },
+        },
+        sleekThemeSelect: {
+          "0%": { transform: "scale(1) translateY(0)", boxShadow: "0 0 0 0 rgba(255, 255, 255, 0.3)", opacity: 0.9 },
+          "50%": { transform: "scale(1.12) translateY(-4px)", boxShadow: "0 0 30px 10px rgba(255, 255, 255, 0.5)", opacity: 1 },
+          "100%": { transform: "scale(1) translateY(0)", boxShadow: "0 0 0 0 rgba(255, 255, 255, 0.3)", opacity: 1 },
         },
         spinSlow: {
           "0%": { transform: "rotate(0deg)" },
@@ -111,23 +122,29 @@ export default {
   ],
   plugins: [daisyui],
   daisyui: {
-    themes: Object.keys(require("./src/constants/themes.js").THEME_COLORS).map(theme => ({
-      [theme]: {
-        primary: require("./src/constants/themes.js").THEME_COLORS[theme].primary,
-        secondary: require("./src/constants/themes.js").THEME_COLORS[theme].secondary,
-        tertiary: require("./src/constants/themes.js").THEME_COLORS[theme].tertiary,
-        quaternary: require("./src/constants/themes.js").THEME_COLORS[theme].quaternary,
-        accent: require("./src/constants/themes.js").THEME_COLORS[theme].tertiary,
-        neutral: require("./src/constants/themes.js").THEME_COLORS[theme].quaternary,
-        "base-100": require("./src/constants/themes.js").THEME_COLORS[theme]["base-100"],
-        "base-200": require("./src/constants/themes.js").THEME_COLORS[theme]["base-200"],
-        "base-300": require("./src/constants/themes.js").THEME_COLORS[theme]["base-300"],
-        "base-content": require("./src/constants/themes.js").THEME_COLORS[theme]["base-content"],
-        "primary-content": require("./src/constants/themes.js").THEME_COLORS[theme]["primary-content"],
-        "secondary-content": require("./src/constants/themes.js").THEME_COLORS[theme]["secondary-content"],
-        "tertiary-content": require("./src/constants/themes.js").THEME_COLORS[theme]["tertiary-content"],
-        "quaternary-content": require("./src/constants/themes.js").THEME_COLORS[theme]["quaternary-content"],
-      },
-    })),
+    themes: Object.keys(require("./src/constants/themes.js").THEME_COLORS).map(theme => {
+      const themeColors = require("./src/constants/themes.js").THEME_COLORS[theme];
+      // Detect light theme based on base-100 brightness
+      const isLightTheme = themeColors["base-100"].match(/^#(?:[fF]{6}|[eE][0-9a-fA-F]{5}|[fF][0-9a-fA-F]{5}|[dD][0-9a-fA-F]{5})$/);
+      return {
+        [theme]: {
+          primary: themeColors.primary,
+          secondary: themeColors.secondary,
+          tertiary: themeColors.tertiary,
+          quaternary: themeColors.quaternary,
+          accent: themeColors.tertiary,
+          neutral: themeColors.quaternary,
+          "base-100": themeColors["base-100"],
+          "base-200": themeColors["base-200"],
+          "base-300": themeColors["base-300"],
+          "base-content": isLightTheme ? "#1f2937" : themeColors["base-content"],
+          "primary-content": isLightTheme ? "#111827" : themeColors["primary-content"],
+          "secondary-content": isLightTheme ? "#111827" : themeColors["secondary-content"],
+          "tertiary-content": isLightTheme ? "#111827" : themeColors["tertiary-content"],
+          "quaternary-content": isLightTheme ? "#111827" : themeColors["quaternary-content"],
+          "--glow": isLightTheme ? "pulseGlowDark" : "pulseGlow",
+        },
+      };
+    }),
   },
 };
