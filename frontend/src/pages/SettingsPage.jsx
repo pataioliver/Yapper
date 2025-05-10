@@ -98,7 +98,7 @@ const SettingsPage = () => {
             <div className="space-y-3 animate-slideIn">
               <h3 className="text-xl font-semibold text-base-content">Current Theme</h3>
               <div
-                className="flex flex-col items-center gap-3 p-10 rounded-3xl bg-base-100/15 backdrop-blur-2xl w-full max-w-lg mx-auto ring-2 ring-primary/50 animate-pulseGlow transition-all duration-700 animate-scaleIn border border-white/10 pointer-events-none"
+                className="flex flex-col items-center gap-3 p-10 rounded-3xl bg-base-100/15 backdrop-blur-2xl w-full max-w-lg mx-auto ring-2 ring-primary/50 animate-pulseGlow transition-all duration-700 border border-white/10 pointer-events-none"
                 data-theme={theme}
               >
                 <div className="w-36 h-32 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.4)] border border-white/10">
@@ -242,7 +242,7 @@ const SettingsPage = () => {
                       <input
                         type="text"
                         placeholder="Type a message..."
-                        className="input input-bordered w-full pl-8 pr-10 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                        className="input w-full pl-8 pr-10 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                         disabled
                       />
                       <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-quaternary-content" />
@@ -326,7 +326,7 @@ const SettingsPage = () => {
                     <input
                       type="text"
                       placeholder="Type a message..."
-                      className="input input-bordered w-full pl-10 pr-12 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                      className="input w-full pl-10 pr-12 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                       disabled
                     />
                     <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 text-quaternary-content" />
