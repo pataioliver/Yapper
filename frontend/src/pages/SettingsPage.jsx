@@ -1,208 +1,340 @@
-import { useState } from "react";
-import { THEMES } from "../constants/themes.js";
+import { useState, useEffect } from "react";
+import { THEMES, THEME_COLORS } from "../constants/themes.js";
 import { useThemeStore } from "../store/useThemeStore";
-import { Send, ChevronRight, Check, Image, Bell } from "lucide-react";
+import { Send, Check, Image, Bell } from "lucide-react";
+import toast from "react-hot-toast";
 
 const PREVIEW_MESSAGES = [
-  { id: 1, content: "Hey! How's it going?", isSent: false },
-  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+  {
+    id: 1,
+    content: "Yo, what's good?",
+    isSent: false,
+    senderId: "user1",
+    reactions: [{ emoji: "👍", userId: "user2" }],
+    replyToId: null,
+  },
+  {
+    id: 2,
+    content: "Just gooning!",
+    isSent: true,
+    senderId: "user2",
+    reactions: [{ emoji: "❤️", userId: "user1" }, { emoji: "😄", userId: "user1" }],
+    replyToId: "1",
+  },
 ];
 
+const normalizeFontName = (font) => {
+  return font
+    .split(",")[0]
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+};
+
 const SettingsPage = () => {
-  const { theme, setTheme } = useThemeStore();
+  const { theme, fontClass, setTheme } = useThemeStore();
   const [previewTheme, setPreviewTheme] = useState(theme);
+  const [previewFontClass, setPreviewFontClass] = useState(fontClass);
+
+  useEffect(() => {
+    setPreviewTheme(theme);
+    setPreviewFontClass(fontClass);
+  }, [theme, fontClass]);
+
+  const handleThemeSelect = (selectedTheme) => {
+    setPreviewTheme(selectedTheme);
+    const font = THEME_COLORS[selectedTheme]?.font || "-apple-system, BlinkMacSystemFont, sans-serif";
+    setPreviewFontClass(`font-${normalizeFontName(font)}`);
+  };
 
   const handleApplyTheme = () => {
     setTheme(previewTheme);
+    toast.success("Theme applied!", { icon: "🎨" });
   };
 
   const handleEnableNotifications = async () => {
     if (!("Notification" in window)) {
-      alert("This browser does not support notifications.");
+      toast.error("Notifications not supported.");
       return;
     }
-
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
-      alert("Notifications enabled!");
-      // Register the service worker for push notifications
-      registerServiceWorkerForPush();
+      toast.success("Notifications enabled!", { icon: "🔔" });
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js").catch(console.error);
+      }
     } else if (permission === "denied") {
-      alert("Notifications are disabled. Please enable them in your browser settings.");
+      toast.error("Notifications blocked. Enable in browser settings.");
     }
   };
 
-  const registerServiceWorkerForPush = async () => {
-    if ("serviceWorker" in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register("/service-worker.js");
-        console.log("Service Worker registered for push notifications:", registration);
-      } catch (error) {
-        console.error("Service Worker registration failed:", error);
-      }
-    } else {
-      console.error("Service Worker is not supported in this browser.");
-    }
-  };
+  const authUser = { _id: "user2", fullName: "You" };
+  const selectedUser = { _id: "user1", fullName: "Ariana Grande" };
+
+  const getQuotedMessage = (replyToId) => PREVIEW_MESSAGES.find((msg) => msg.id === replyToId);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-base-200 to-base-300/70 animate-in fade-in duration-600 flex items-center justify-center px-4 pt-20 pb-8">
-      <div className="w-full max-w-5xl bg-base-100 rounded-lg p-6 shadow-lg shadow-primary/20 transition-all duration-400 hover:shadow-xl">
-        <div className="space-y-6">
-
-          {/* Add the notification button */}
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-              Notifications
-            </h3>
+    <div
+      className={`min-h-screen px-4 pt-20 pb-8 animate-glassMorphPulse bg-transparent ${fontClass}`}
+      data-theme={theme}
+    >
+      <div className="max-w-5xl mx-auto bg-base-100/85 backdrop-blur-xl rounded-2xl p-6 shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all duration-500 animate-glassMorph border border-base-content/20">
+        <div className="space-y-8">
+          <div className="flex justify-between items-center animate-slideIn">
+            <h3 className="text-2xl font-semibold text-base-content">Notifications</h3>
             <button
               onClick={handleEnableNotifications}
-              className="btn btn-primary btn-sm flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-primary/20"
+              className="bg-secondary/20 backdrop-blur-lg text-secondary-content rounded-xl px-5 py-2.5 font-medium hover:bg-gradient-to-br hover:from-secondary/50 hover:to-primary/50 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] transition-all duration-700 animate-scaleIn border border-white/10"
             >
-              <Bell size={18} />
+              <Bell size={20} className="inline-block mr-2" />
               Enable Notifications
             </button>
           </div>
-
-
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-              Theme
-            </h2>
-            <p className="text-sm text-base-content/70 transition-opacity duration-300 hover:opacity-80">
-              Choose a theme for your chat interface
-            </p>
+          <div className="space-y-3 animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-base-content">Theme</h2>
+            <p className="text-base text-quaternary-content">Customize your experience with a theme</p>
           </div>
-
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-            {THEMES.map((t) => (
-              <button
-                key={t}
-                className={`
-                  group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all duration-300
-                  ${previewTheme === t ? "bg-base-200 shadow-md shadow-primary/20" : "hover:bg-base-200/70 hover:shadow-md hover:shadow-primary/20"}
-                `}
-                onClick={() => setPreviewTheme(t)}
+          <div className="space-y-6">
+            <div className="space-y-3 animate-slideIn">
+              <h3 className="text-xl font-semibold text-base-content">Current Theme</h3>
+              <div
+                className="flex flex-col items-center gap-3 p-10 rounded-3xl bg-base-100/15 backdrop-blur-2xl w-full max-w-lg mx-auto ring-2 ring-primary/50 animate-pulseGlow transition-all duration-700 animate-scaleIn border border-white/10 pointer-events-none"
+                data-theme={theme}
               >
-                <div
-                  className="relative h-8 w-full rounded-md overflow-hidden transition-transform duration-300 group-hover:scale-105"
-                  data-theme={t}
-                >
-                  <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
-                    <div className="rounded bg-primary"></div>
-                    <div className="rounded bg-secondary"></div>
-                    <div className="rounded bg-accent"></div>
-                    <div className="rounded bg-neutral"></div>
-                  </div>
+                <div className="w-36 h-32 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.4)] border border-white/10">
+                  <div className="h-8" style={{ backgroundColor: THEME_COLORS[theme].primary }} />
+                  <div className="h-8" style={{ backgroundColor: THEME_COLORS[theme].secondary }} />
+                  <div className="h-8" style={{ backgroundColor: THEME_COLORS[theme].tertiary }} />
+                  <div className="h-8" style={{ backgroundColor: THEME_COLORS[theme].quaternary }} />
                 </div>
-                <span className="text-[11px] font-medium truncate w-full text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                <span className="text-lg font-semibold text-base-content">
+                  {theme
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (str) => str.toUpperCase())
+                    .replace("Ios", "iOS")
+                    .replace("Oled", "OLED")}
                 </span>
-              </button>
-            ))}
-          </div>
+              </div>
+            </div>
 
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-              Preview
-            </h3>
+            <div className="space-y-3 animate-fadeIn">
+              <h3 className="text-xl font-semibold text-base-content">Available Themes</h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                {THEMES.filter((t) => t !== theme).map((t, index) => {
+                  const themeFont = THEME_COLORS[t]?.font || "-apple-system, BlinkMacSystemFont, sans-serif";
+                  const themeFontClass = `font-${normalizeFontName(themeFont)}`;
+                  return (
+                    <button
+                      key={t}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-500 animate-glassMorph border border-white/10 ${previewTheme === t
+                          ? "scale-110 ring-2 ring-primary/80 shadow-[0_0_25px_var(--primary)] animate-bounceInScale z-10"
+                          : "hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                        }`}
+                      onClick={() => handleThemeSelect(t)}
+                      data-theme={t}
+                      style={{
+                        backgroundImage: `linear-gradient(135deg, ${THEME_COLORS[t].primary}15, ${THEME_COLORS[t].secondary}15)`,
+                        animationDelay: `${index * 0.05}s`,
+                      }}
+                    >
+                      <div className="w-16 h-14 rounded-lg overflow-hidden shadow-[0_0_10px_rgba(255,255,255,0.2)] border border-white/10">
+                        <div className="h-3.5" style={{ backgroundColor: THEME_COLORS[t].primary }} />
+                        <div className="h-3.5" style={{ backgroundColor: THEME_COLORS[t].secondary }} />
+                        <div className="h-3.5" style={{ backgroundColor: THEME_COLORS[t].tertiary }} />
+                        <div className="h-3.5" style={{ backgroundColor: THEME_COLORS[t].quaternary }} />
+                      </div>
+                      <span className={`text-xs font-medium text-base-content ${themeFontClass} truncate w-full text-center`}>
+                        {t
+                          .replace(/([A-Z])/g, " $1")
+                          .replace(/^./, (str) => str.toUpperCase())
+                          .replace("Ios", "iOS")
+                          .replace("Oled", "OLED")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between items-center animate-slideIn">
+            <h3 className="text-2xl font-semibold text-base-content">Preview</h3>
             <button
               onClick={handleApplyTheme}
-              className="btn btn-primary btn-sm flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-primary/20"
+              className="bg-secondary/20 backdrop-blur-lg text-secondary-content rounded-xl px-5 py-2.5 font-medium hover:bg-gradient-to-br hover:from-secondary/50 hover:to-primary/50 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] transition-all duration-700 animate-scaleIn border border-white/10"
+              style={{ backgroundColor: THEME_COLORS[previewTheme].secondary + "33" }}
             >
-              <Check size={18} />
+              <Check size={20} className="inline-block mr-2" />
               Apply Theme
             </button>
           </div>
-
-          <div
-            className="flex-1 flex flex-col overflow-auto bg-base-100 rounded-xl shadow-md shadow-primary/20"
-            data-theme={previewTheme}
-          >
-            {/* Chat Header */}
-            <div className="p-2.5 border-b border-base-300 h-14 flex items-center bg-base-100 shadow-sm">
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <button
-                    className="p-1 bg-base-300 rounded"
-                    disabled
-                    aria-hidden="true"
-                  >
-                    <ChevronRight className="size-6 text-primary" />
-                  </button>
-                  <div className="avatar">
-                    <div className="size-10 rounded-full border-2 border-primary/20">
-                      <img src="/avatar.png" alt="John Doe" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                      John Doe
-                    </h3>
-                    <p className="text-sm text-base-content/70">
-                      Online
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {PREVIEW_MESSAGES.map((message) => (
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex-1 animate-glassMorph">
+              <div
+                className="relative mx-auto w-80 h-[600px] bg-gradient-to-b from-gray-900/50 to-black/50 rounded-[56px] shadow-[0_0_50px_rgba(255,255,255,0.5)] overflow-hidden border border-white/10"
+                style={{
+                  boxShadow: `0 0 20px 3px ${THEME_COLORS[previewTheme].primary}60, inset 0 0 12px ${THEME_COLORS[previewTheme].secondary}40`,
+                  background: `linear-gradient(135deg, ${THEME_COLORS[previewTheme].primary}15, ${THEME_COLORS[previewTheme].secondary}15)`,
+                }}
+              >
                 <div
-                  key={message.id}
-                  className={`chat ${message.isSent ? "chat-end" : "chat-start"}`}
+                  className="absolute top-4 left-1/2 -translate-x-1/2 w-36 h-8 rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${THEME_COLORS[previewTheme].primary}30, ${THEME_COLORS[previewTheme].secondary}30)`,
+                    boxShadow: `0 0 12px ${THEME_COLORS[previewTheme].secondary}60`,
+                    backdropFilter: "blur(8px)",
+                  }}
+                />
+                <div
+                  className={`absolute inset-3 bg-base-100/15 backdrop-blur-2xl rounded-[48px] overflow-hidden ${previewFontClass}`}
+                  data-theme={previewTheme}
                 >
-                  <div className="chat-image avatar">
-                    <div className="size-10 rounded-full border-2 border-primary/20">
-                      <img src="/avatar.png" alt="profile pic" />
+                  <div className="h-full flex flex-col p-4">
+                    <div className="flex-1 space-y-4 overflow-y-auto">
+                      {PREVIEW_MESSAGES.map((message, idx) => {
+                        const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
+                        const isOwnMessage = message.senderId === authUser._id;
+                        return (
+                          <div
+                            key={message.id}
+                            className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-slideIn`}
+                            style={{ animationDelay: `${idx * 0.1}s` }}
+                          >
+                            <div className="chat-image avatar">
+                              <div className="size-8 rounded-full border border-quaternary/50">
+                                <img
+                                  src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedUser.profilePic || "/avatar.png"}
+                                  alt="profile pic"
+                                  className="rounded-full"
+                                />
+                              </div>
+                            </div>
+                            <div className="chat-header mb-1">
+                              <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedUser.fullName}</time>
+                            </div>
+                            <div
+                              className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
+                                } backdrop-blur-2xl max-w-[75%] rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-700 animate-glassMorph font-medium text-base border border-white/10`}
+                            >
+                              {quotedMessage && (
+                                <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
+                                  <p className="text-xs text-quaternary-content">
+                                    {quotedMessage.senderId === authUser._id ? "You" : selectedUser.fullName}
+                                  </p>
+                                  <p className="text-xs truncate max-w-[120px] text-quaternary-content">{quotedMessage.content}</p>
+                                </div>
+                              )}
+                              <p className="text-sm">{message.content}</p>
+                              {message.reactions?.length > 0 && (
+                                <div className="flex gap-1 mt-1">
+                                  {message.reactions.map((reaction, rIdx) => (
+                                    <span key={rIdx} className="text-xs text-tertiary-content">
+                                      {reaction.emoji}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4 relative animate-fadeIn">
+                      <input
+                        type="text"
+                        placeholder="Type a message..."
+                        className="input input-bordered w-full pl-8 pr-10 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                        disabled
+                      />
+                      <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-quaternary-content" />
+                      <Send className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary-content" />
                     </div>
                   </div>
-                  <div className="chat-header mb-1">
-                    <time className="text-xs opacity-50 ml-1">
-                      12:00 PM
-                    </time>
-                  </div>
-                  <div
-                    className={`
-                      chat-bubble flex flex-col
-                      ${message.isSent ? "bg-primary/20" : "bg-base-200"}
-                    `}
-                  >
-                    <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-                      {message.content}
-                    </p>
+                </div>
+              </div>
+              <p className="text-center text-sm text-quaternary-content mt-2 animate-fadeIn">Mobile Preview</p>
+            </div>
+            <div className="flex-1 animate-glassMorph">
+              <div
+                className="relative mx-auto w-full max-w-md bg-base-100/15 backdrop-blur-2xl rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.4)] border border-white/10"
+                style={{ boxShadow: `0 0 15px ${THEME_COLORS[previewTheme].primary}60` }}
+              >
+                <div
+                  className="h-10 flex items-center px-4"
+                  style={{
+                    background: `linear-gradient(90deg, ${THEME_COLORS[previewTheme].primary}30, ${THEME_COLORS[previewTheme].secondary}30)`,
+                    boxShadow: `0 0 12px ${THEME_COLORS[previewTheme].primary}50`,
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Chat Input */}
-            <div className="p-4 w-full bg-base-100">
-              <div className="flex items-center gap-2 bg-base-100 rounded-lg p-2 shadow-md shadow-primary/10">
-                <input
-                  type="text"
-                  className="flex-1 input input-bordered rounded-lg input-md focus:ring-2 focus:ring-primary focus:bg-base-100/90"
-                  placeholder="Type a message..."
-                  value="This is a preview"
-                  readOnly
-                />
-                <button
-                  type="button"
-                  className="btn btn-md btn-circle text-zinc-400"
-                  disabled
-                >
-                  <Image size={20} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-md btn-circle text-zinc-400"
-                  disabled
-                >
-                  <Send size={20} />
-                </button>
+                <div className={`p-6 ${previewFontClass}`} data-theme={previewTheme}>
+                  <div className="space-y-4">
+                    {PREVIEW_MESSAGES.map((message, idx) => {
+                      const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
+                      const isOwnMessage = message.senderId === authUser._id;
+                      return (
+                        <div
+                          key={message.id}
+                          className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-slideIn`}
+                          style={{ animationDelay: `${idx * 0.1}s` }}
+                        >
+                          <div className="chat-image avatar">
+                            <div className="size-10 rounded-full border border-quaternary/50">
+                              <img
+                                src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedUser.profilePic || "/avatar.png"}
+                                alt="profile pic"
+                                className="rounded-full"
+                              />
+                            </div>
+                          </div>
+                          <div className="chat-header mb-1">
+                            <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedUser.fullName}</time>
+                          </div>
+                          <div
+                            className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
+                              } backdrop-blur-2xl max-w-[75%] rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-700 animate-glassMorph font-medium text-base border border-white/10`}
+                          >
+                            {quotedMessage && (
+                              <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
+                                <p className="text-xs text-quaternary-content">
+                                  {quotedMessage.senderId === authUser._id ? "You" : selectedUser.fullName}
+                                </p>
+                                <p className="text-xs truncate max-w-[150px] text-quaternary-content">{quotedMessage.content}</p>
+                              </div>
+                            )}
+                            <p className="text-sm">{message.content}</p>
+                            {message.reactions?.length > 0 && (
+                              <div className="flex gap-1 mt-1">
+                                {message.reactions.map((reaction, rIdx) => (
+                                  <span key={rIdx} className="text-xs text-tertiary-content">
+                                    {reaction.emoji}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 relative animate-fadeIn">
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      className="input input-bordered w-full pl-10 pr-12 bg-base-100/15 backdrop-blur-lg border-white/10 text-sm shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                      disabled
+                    />
+                    <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 text-quaternary-content" />
+                    <Send className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-secondary-content" />
+                  </div>
+                </div>
               </div>
+              <p className="text-center text-sm text-quaternary-content mt-2 animate-fadeIn">Desktop Preview</p>
             </div>
           </div>
         </div>

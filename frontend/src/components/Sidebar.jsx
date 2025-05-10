@@ -22,8 +22,6 @@ const Sidebar = () => {
     getUsers();
   }, [getUsers]);
 
-  console.log("Users in Sidebar:", users); // Debug logging
-
   const filteredUsers = showOnlineOnly
     ? users.filter((user) => onlineUsers.includes(user._id))
     : users;
@@ -51,70 +49,68 @@ const Sidebar = () => {
   return (
     <aside
       className={`
-        h-full bg-base-100 transition-all duration-400 ease-in-out
-        ${isSidebarOpen ? "w-full lg:w-72 opacity-100" : "w-0 lg:w-0 opacity-0"}
+        h-full bg-base-100/10 backdrop-blur-2xl transition-all duration-500 ease-in-out
+        ${isSidebarOpen ? "w-full lg:w-80 opacity-100" : "w-0 lg:w-0 opacity-0"}
         ${
           isSidebarOpen && window.innerWidth < 1024
             ? "flex flex-col h-[calc(100%-4rem)]"
-            : "relative border-r border-base-300 h-full"
+            : "relative border-r border-quaternary/20 h-full"
         }
-        flex flex-col overflow-x-hidden bg-gradient-to-b from-base-100 to-base-200/30
+        flex flex-col overflow-x-hidden rounded-tl-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] animate-glassMorph
       `}
     >
-      <div
-        className="border-b border-base-300 w-full p-2.5 flex justify-between items-center h-14 bg-base-100/95 animate-in fade-in duration-400 shadow-sm"
-      >
-        <div className="flex items-center gap-2">
-          <Users
-            className="size-6 transition-transform duration-300 hover:scale-110 text-primary"
-          />
-          <span className="font-medium text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+      <div className="border-b border-quaternary/20 w-full p-3 flex justify-between items-center h-16 bg-base-200/15 backdrop-blur-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] animate-glassMorph">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-full bg-quaternary/15 backdrop-blur-2xl shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale">
+            <Users className="size-7 text-tertiary" />
+          </div>
+          <span className="font-semibold text-lg text-base-content animate-glassMorph">
             Contacts
           </span>
         </div>
         {selectedUser && (
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-1 hover:bg-base-300 rounded transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-md hover:shadow-primary/20"
+            className="p-2.5 bg-quaternary/15 backdrop-blur-2xl text-quaternary-content rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-quaternary/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
             aria-label="Close sidebar"
           >
-            <ChevronLeft className="size-6 text-primary" />
+            <ChevronLeft className="size-7 text-quaternary-content" />
           </button>
         )}
       </div>
 
       {isSidebarOpen && (
-        <div className="p-3 border-b border-base-300 animate-in slide-in-from-top-2 duration-400">
-          <div className="mt-2">
+        <div className="p-4 border-b border-quaternary/20 animate-glassMorph">
+          <div className="mt-3">
             <input
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input input-sm input-bordered w-full transition-all duration-300 focus:ring-2 focus:ring-primary focus:bg-base-100/90 hover:shadow-md hover:shadow-primary/20"
+              className="input input-sm input-bordered w-full focus:ring-2 focus:ring-quaternary/50 focus:bg-base-100/15 backdrop-blur-2xl border-base-300/50 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph"
             />
           </div>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-3 flex items-center gap-3">
             <label className="cursor-pointer flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={showOnlineOnly}
                 onChange={(e) => setShowOnlineOnly(e.target.checked)}
-                className="checkbox checkbox-sm transition-transform duration-300 hover:scale-110 hover:border-primary/50"
+                className="checkbox checkbox-sm border-quaternary/50 animate-glassMorph"
               />
-              <span className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+              <span className="text-base text-base-content animate-glassMorph">
                 Show online only
               </span>
             </label>
-            <span className="text-xs text-zinc-500 animate-pulse">
+            <span className="text-sm text-quaternary/80 animate-glassMorph">
               ({onlineUsers.length - 1} online)
             </span>
           </div>
         </div>
       )}
 
-      <div className="overflow-y-auto w-full py-2">
-        {filteredAndSearchedUsers.map((user, index) => (
+      <div className="overflow-y-auto w-full py-3">
+        {filteredAndSearchedUsers.map((user, idx) => (
           <button
             key={user._id}
             onClick={() => {
@@ -122,39 +118,38 @@ const Sidebar = () => {
               if (window.innerWidth < 1024) setSidebarOpen(false);
             }}
             className={`
-              w-full p-2 flex items-center gap-3
-              hover:bg-base-300/70 transition-all duration-300
-              ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-primary/30 shadow-sm" : ""}
-              animate-in fade-in slide-in-from-left-2 duration-400 delay-${index * 50}
-              hover:shadow-md hover:shadow-primary/20
+              w-full p-3 flex items-center gap-4 transition-all duration-500 animate-glassMorph
+              backdrop-blur-xl border border-white/10 hover:border-white/20
+              ${
+                selectedUser?._id === user._id
+                  ? "bg-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.2)] ring-2 ring-primary/40"
+                  : "hover:bg-white/5"
+              }
             `}
+            style={{ animationDelay: `${idx * 0.05}s` }}
           >
             <div className="relative flex-shrink-0">
               <img
                 src={user.profilePic || "/avatar.png"}
                 alt={user.fullName}
-                className="size-10 object-cover rounded-full transition-transform duration-300 hover:scale-110 border-2 border-primary/20"
+                className="size-12 object-cover rounded-full border-2 border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
               />
               {onlineUsers.includes(user._id) && (
-                <span
-                  className="absolute bottom-0 right-0 size-2.5 bg-green-500 
-                  rounded-full ring-1.5 ring-base-100 animate-pulse"
-                />
+                <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-base-100/50 animate-pulseGlow" />
               )}
             </div>
             <div className="flex-1 text-left overflow-hidden">
-              <div className="font-medium truncate bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+              <div className="font-semibold text-lg text-base-content animate-glassMorph">
                 {user.fullName}
               </div>
-              <div className="text-sm text-zinc-400 transition-opacity duration-300 hover:opacity-80">
+              <div className="text-base text-quaternary/80 animate-glassMorph">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>
             </div>
           </button>
         ))}
-
         {filteredAndSearchedUsers.length === 0 && (
-          <div className="text-center text-zinc-500 py-4 animate-in fade-in duration-400">
+          <div className="text-center text-quaternary/80 py-5 animate-glassMorph">
             No users found
           </div>
         )}

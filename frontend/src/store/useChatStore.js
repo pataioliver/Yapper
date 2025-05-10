@@ -9,7 +9,8 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
-  isSidebarOpen: window.innerWidth >= 1024, // Open by default on large screens
+  isSidebarOpen: window.innerWidth >= 1024,
+  replyingTo: null,
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -27,7 +28,12 @@ export const useChatStore = create((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`api/messages/${userId}`);
-      set({ messages: res.data });
+      const messagesWithReactions = res.data.map((msg) => ({
+        ...msg,
+        reactions: msg.reactions || [],
+        replyToId: msg.replyToId || null,
+      }));
+      set({ messages: messagesWithReactions });
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -36,10 +42,17 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
+    const { selectedUser, messages, replyingTo } = get();
     try {
-      const res = await axiosInstance.post(`api/messages/send/${selectedUser._id}`, messageData);
-      set({ messages: [...messages, res.data] });
+      const payload = {
+        ...messageData,
+        replyToId: replyingTo?._id || null,
+      };
+      const res = await axiosInstance.post(`api/messages/send/${selectedUser._id}`, payload);
+      set({
+        messages: [...messages, { ...res.data, reactions: [], replyToId: payload.replyToId }],
+        replyingTo: null,
+      });
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -56,7 +69,7 @@ export const useChatStore = create((set, get) => ({
       if (!isMessageSentFromSelectedUser) return;
 
       set({
-        messages: [...get().messages, newMessage],
+        messages: [...get().messages, { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null }],
       });
     });
   },
@@ -65,6 +78,26 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
+
+  addReaction: (messageId, reaction) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg._id === messageId
+          ? {
+              ...msg,
+              reactions: [
+                ...msg.reactions.filter(
+                  (r) => !(r.label === reaction.label && r.userId === reaction.userId)
+                ),
+                reaction,
+              ],
+            }
+          : msg
+      ),
+    }));
+  },
+
+  setReplyingTo: (message) => set({ replyingTo: message }),
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
