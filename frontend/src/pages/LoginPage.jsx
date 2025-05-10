@@ -117,7 +117,14 @@ const LoginPage = () => {
               <span className="absolute bottom-0 left-0 w-0 h-px bg-accent group-hover:animate-underlineGrow" />
             </Link>
           </p>
+            <div className="mt-4 text-sm text-gray-600">
+              <Link to="/forgot-password" className="text-primary hover:underline">
+                Forgot your password?
+              </Link>
+            </div>
         </div>
+
+
       </div>
     </div>
   );

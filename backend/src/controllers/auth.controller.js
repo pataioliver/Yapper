@@ -3,6 +3,76 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import { sendEmail } from "../email.js";
+import crypto from "crypto";
+
+export const requestPasswordReset = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Generate a reset token
+        
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        // Hash the reset token using bcrypt
+        const hashedToken = await bcrypt.hash(resetToken, 10);
+
+        // Save the hashed token and expiration time to the database
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = Date.now() + 3600000; // Token valid for 1 hour
+        await user.save();
+
+        // Send reset email
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        const message = `Click the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
+
+        await sendEmail(user.email, "Password Reset Request", message);
+
+        res.status(200).json({ message: "Password reset email sent." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({
+            resetPasswordExpires: { $gt: Date.now() }, // Ensure token is not expired
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        // Compare the provided token with the hashed token in the database
+        const isTokenValid = await bcrypt.compare(token, user.resetPasswordToken);
+        if (!isTokenValid) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        // Clear the reset token and expiration
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error while resetting password" });
+    }
+};
 
 export const signup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -28,7 +98,7 @@ export const signup = async (req, res) => {
         await sendEmail(
             email,
             "Verify Your Email",
-            `Your verification code is: ${verificationCode}\n\nToken: ${token}`
+            `Your verification code is: ${verificationCode}\n\nPlease use this code to verify your email address.`
         );
 
         res.status(200).json({ message: "Verification email sent. Please check your inbox.", token });
@@ -154,4 +224,4 @@ export const checkAuth = async (req, res) => {
         console.log("Error in checkAuth controller", error.message);
         res.status(500).json({ message: "Internal Server error" });
     }
-}
+};
