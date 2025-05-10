@@ -56,7 +56,7 @@ const MessageInput = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 input input-bordered rounded-lg input-md focus:ring-2 focus:ring-quaternary focus:bg-base-100/20 backdrop-blur-lg border-base-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-500 animate-glassMorphPulse"
+          className="flex-1 input input-bordered rounded-lg text-base sm:text-lg focus:ring-2 focus:ring-quaternary focus:bg-base-100/20 backdrop-blur-lg border-base-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-500 animate-glassMorphPulse"
           placeholder="Type a message..."
         />
         <label className="btn btn-md btn-circle bg-tertiary/20 backdrop-blur-2xl text-tertiary-content hover:bg-tertiary/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-all duration-500 animate-subtleScale">

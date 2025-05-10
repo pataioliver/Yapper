@@ -40,110 +40,103 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center backdrop-blur-xl animate-glassMorphPulse">
-      <div className="w-full max-w-lg bg-base-100/85 backdrop-blur-xl rounded-3xl p-10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-white/20 transition-all duration-700 hover:shadow-[0_8px_40px_rgba(255,255,255,0.2)] animate-glassMorph">
+    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl">
+      {/* Main card with glass effect */}
+      <div className="w-full max-w-md mx-4 bg-base-100/85 backdrop-blur-md rounded-3xl p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph">
+        {/* App icon with larger size */}
         <div className="text-center mb-10 animate-bounceInScale">
           <div className="flex flex-col items-center gap-3">
-            <div className="size-14 rounded-2xl bg-gradient-to-r from-primary to-secondary backdrop-blur-md flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-500 hover:scale-110 animate-pulseGlow border border-white/30">
-              <MessageSquare className="size-7 text-primary-content" />
+            <div className="size-16 rounded-2xl bg-secondary/85 backdrop-blur-md flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.15)] hover:shadow-[0_0_15px_rgba(255,255,255,0.25)] transition-all duration-300">
+              <MessageSquare className="w-6 h-6 text-secondary-content" strokeWidth={2.5} />
             </div>
-            <h1 className="text-3xl font-bold mt-3 text-base-content font-poppins animate-fadeIn" style={{ animationDelay: "0.2s" }}>
+            <h1 className="text-3xl font-bold mt-4 text-base-content font-sanfrancisco">
               Create Account
             </h1>
-            <p className="text-quaternary-content/80 font-quicksand animate-slideIn" style={{ animationDelay: "0.4s" }}>
+            <p className="text-base-content/70 font-sanfrancisco">
               Join Yapper today
             </p>
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="form-control animate-slideIn" style={{ animationDelay: "0.6s" }}>
-            <label className="label">
-              <span className="label-text font-medium text-base-content font-roboto">Full Name</span>
-            </label>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Full Name Field */}
+          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-all duration-300 group-focus-within:scale-110">
-                <User className="h-5 w-5 text-quaternary-content/70 group-focus-within:text-quaternary" />
-              </div>
               <input
                 type="text"
-                className="input w-full pl-12 pr-4 py-3 bg-base-100/5 border border-base-content/10 rounded-xl focus:ring-2 focus:ring-quaternary/50 focus:border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500 hover:bg-base-100/10 focus:bg-base-100/15 placeholder-quaternary-content/50 font-nunito animate-subtleScale"
+                className="w-full pl-14 pr-5 py-4 bg-base-100/70 backdrop-blur-sm rounded-xl border border-base-content/10 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 text-base-content placeholder-base-content/50 font-sanfrancisco transition-all duration-300 hover:bg-base-100/90 focus:bg-base-100"
                 placeholder="John Doe"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-primary group-focus-within:scale-110 transition-all duration-300" />
             </div>
           </div>
-          <div className="form-control animate-slideIn" style={{ animationDelay: "0.8s" }}>
-            <label className="label">
-              <span className="label-text font-medium text-base-content font-roboto">Email</span>
-            </label>
+
+          {/* Email Field */}
+          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.4s" }}>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-all duration-300 group-focus-within:scale-110">
-                <Mail className="h-5 w-5 text-quaternary-content/70 group-focus-within:text-quaternary" />
-              </div>
               <input
                 type="email"
-                className="input w-full pl-12 pr-4 py-3 bg-base-100/5 border border-base-content/10 rounded-xl focus:ring-2 focus:ring-quaternary/50 focus:border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500 hover:bg-base-100/10 focus:bg-base-100/15 placeholder-quaternary-content/50 font-nunito animate-subtleScale"
+                className="w-full pl-14 pr-5 py-4 bg-base-100/70 backdrop-blur-sm rounded-xl border border-base-content/10 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 text-base-content placeholder-base-content/50 font-sanfrancisco transition-all duration-300 hover:bg-base-100/90 focus:bg-base-100"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-primary group-focus-within:scale-110 transition-all duration-300" />
             </div>
           </div>
-          <div className="form-control animate-slideIn" style={{ animationDelay: "1s" }}>
-            <label className="label">
-              <span className="label-text font-medium text-base-content font-roboto">Password</span>
-            </label>
+
+          {/* Password Field */}
+          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.6s" }}>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-all duration-300 group-focus-within:scale-110">
-                <Lock className="h-5 w-5 text-quaternary-content/70 group-focus-within:text-quaternary" />
-              </div>
               <input
                 type={showPassword ? "text" : "password"}
-                className="input w-full pl-12 pr-12 py-3 bg-base-100/5 border border-base-content/10 rounded-xl focus:ring-2 focus:ring-quaternary/50 focus:border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500 hover:bg-base-100/10 focus:bg-base-100/15 placeholder-quaternary-content/50 font-nunito animate-subtleScale"
-                placeholder="••••••••"
+                className="w-full pl-14 pr-12 py-4 bg-base-100/70 backdrop-blur-sm rounded-xl border border-base-content/10 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 text-base-content placeholder-base-content/50 font-sanfrancisco transition-all duration-300 hover:bg-base-100/90 focus:bg-base-100"
+                placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-primary group-focus-within:scale-110 transition-all duration-300" />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-4 flex items-center transition-all duration-300 hover:scale-110 animate-fadeIn"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-primary group-focus-within:scale-110 transition-all duration-300"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-quaternary-content/70 hover:text-quaternary" />
-                ) : (
-                  <Eye className="h-5 w-5 text-quaternary-content/70 hover:text-quaternary" />
-                )}
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="relative w-full bg-secondary/90 backdrop-blur-md text-secondary-content rounded-xl py-3 px-4 font-semibold font-poppins shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all duration-500 hover:scale-105 active:scale-95 animate-dynamicScale border border-white/20 overflow-hidden group"
+            className="w-full bg-secondary text-secondary-content py-4 px-6 rounded-xl font-semibold font-sanfrancisco shadow-md hover:shadow-lg transition-all duration-300 hover:dynamicScale active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
             disabled={isSigningUp}
           >
-            <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-0 group-hover:scale-100 origin-center rounded-full" />
             {isSigningUp ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin text-secondary-content inline-block mr-2" />
-                Signing up...
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Signing up...</span>
               </>
             ) : (
               "Sign up"
             )}
           </button>
         </form>
-        <div className="text-center mt-6 animate-fadeIn" style={{ animationDelay: "1.2s" }}>
-          <p className="text-quaternary-content/80 font-quicksand">
+
+        {/* Footer with improved link visibility */}
+        <div className="text-center mt-8 animate-glassMorph" style={{ animationDelay: "0.8s" }}>
+          <p className="text-base-content/70 font-sanfrancisco">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="relative text-tertiary-content font-semibold font-nunito transition-all duration-500 hover:text-tertiary/80 group"
+              className="text-accent font-semibold hover:text-accent-focus transition-colors duration-300 relative group"
             >
               Sign in
-              <span className="absolute bottom-0 left-0 h-0.5 bg-tertiary/80 w-0 group-hover:w-full transition-all duration-500" />
+              <span className="absolute bottom-0 left-0 w-0 h-px bg-accent group-hover:animate-underlineGrow" />
             </Link>
           </p>
             <div className="mt-4 text-sm text-gray-600">

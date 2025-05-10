@@ -39,48 +39,43 @@ const VerifyEmailPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center backdrop-blur-xl animate-glassMorphPulse">
-      <div className="w-full max-w-lg bg-base-100/85 backdrop-blur-xl rounded-2xl p-10 shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all duration-500 animate-glassMorphPulse border border-base-content/20">
-        <div className="text-center mb-10 animate-popIn">
+    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl">
+      <div className="w-full max-w-md mx-4 bg-base-100/85 backdrop-blur-md rounded-3xl p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph">
+        <div className="text-center mb-10 animate-bounceInScale">
           <div className="flex flex-col items-center gap-3">
-            <div className="size-14 rounded-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all duration-500 animate-softPulse border border-base-content/20">
-              <Mail className="size-7 text-primary-content" />
+            <div className="size-16 rounded-2xl bg-secondary/85 backdrop-blur-md flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.15)] hover:shadow-[0_0_15px_rgba(255,255,255,0.25)] transition-all duration-300">
+              <Mail className="w-6 h-6 text-secondary-content" strokeWidth={2.5} />
             </div>
-            <h1 className="text-3xl font-bold mt-3 text-base-content animate-popIn" style={{ animationDelay: "0.2s" }}>
+            <h1 className="text-3xl font-bold mt-4 text-base-content font-sanfrancisco">
               Verify Your Email
             </h1>
-            <p className="text-quaternary-content text-base animate-popIn" style={{ animationDelay: "0.4s" }}>
+            <p className="text-base-content/70 font-sanfrancisco">
               Enter the verification code sent to your email
             </p>
           </div>
         </div>
-        <form onSubmit={handleVerify} className="space-y-8">
-          <div className="form-control animate-popIn" style={{ animationDelay: "0.6s" }}>
-            <label className="label">
-              <span className="label-text font-medium text-base-content">Verification Code</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Key className="h-6 w-6 text-quaternary-content" />
-              </div>
+        <form onSubmit={handleVerify} className="space-y-6">
+          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.2s" }}>
+            <div className="relative group">
               <input
                 type="text"
-                className="input input-bordered w-full pl-11 focus:ring-2 focus:ring-quaternary bg-base-100/85 backdrop-blur-sm border-base-content/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all duration-500 animate-popIn"
+                className="w-full pl-14 pr-5 py-4 bg-base-100/70 backdrop-blur-sm rounded-xl border border-base-content/10 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 text-base-content placeholder-base-content/50 font-sanfrancisco transition-all duration-300 hover:bg-base-100/90 focus:bg-base-100"
                 placeholder="Enter your code"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
               />
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-primary group-focus-within:scale-110 transition-all duration-300" />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-primary/85 backdrop-blur-sm text-primary-content rounded-lg p-3.5 shadow-[0_0_10px_rgba(255,255,255,0.3)] hover:scale-105 transition-all duration-500 animate-popIn border border-base-content/20"
+            className="w-full bg-secondary text-secondary-content py-4 px-6 rounded-xl font-semibold font-sanfrancisco shadow-md hover:shadow-lg transition-all duration-300 hover:dynamicScale active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
             disabled={isVerifying}
           >
             {isVerifying ? (
               <>
-                <Loader2 className="h-6 w-6 animate-spin text-primary-content inline-block mr-2" />
-                Verifying...
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Verifying...</span>
               </>
             ) : (
               "Verify Email"
