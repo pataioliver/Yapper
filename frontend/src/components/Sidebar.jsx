@@ -1,159 +1,262 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users, ChevronLeft } from "lucide-react";
+import { UserPlus2, UserMinus2, UserCheck2, UserRoundX, ChevronLeft, UsersRound } from "lucide-react";
 
 const Sidebar = () => {
   const {
-    getUsers,
-    users,
-    selectedUser,
+    friends,
+    pendingRequests,
+    recommendations,
+    fetchFriendshipData,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    sendFriendRequest,
+    unfriend,
     setSelectedUser,
-    isUsersLoading,
+    selectedUser,
     isSidebarOpen,
     setSidebarOpen,
+    isUsersLoading,
+    allFriendships,
   } = useChatStore();
-  const { onlineUsers } = useAuthStore();
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+
+  const { authUser, onlineUsers } = useAuthStore();
+
+  // State for search query and online filter
   const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
-    getUsers();
-  }, [getUsers]);
+    fetchFriendshipData();
 
-  const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id))
-    : users;
+    // Automatically open the sidebar on small devices
+    if (window.innerWidth < 768) {
+      setSidebarOpen(true);
+      setSelectedUser(null); // Ensure no chat is selected initially
+    }
+  }, [fetchFriendshipData, setSidebarOpen, setSelectedUser]);
 
-  const filteredAndSearchedUsers = filteredUsers.filter((user) =>
-    user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Memoized filtered friends
+  const filteredFriends = useMemo(() => {
+    return friends.filter((friend) => {
+      const friendUser =
+        friend.requester._id === authUser._id ? friend.recipient : friend.requester;
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(!selectedUser);
-      }
-    };
+      const matchesSearch = friendUser.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesOnline = !showOnlineOnly || onlineUsers.includes(friendUser._id);
 
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, [setSidebarOpen, selectedUser]);
+      return matchesSearch && matchesOnline;
+    });
+  }, [friends, searchQuery, showOnlineOnly, onlineUsers, authUser._id]);
 
-  if (isUsersLoading) return <SidebarSkeleton />;
+  // Memoized filtered pending requests
+  const filteredPendingRequests = useMemo(() => {
+    return pendingRequests.filter((req) => {
+      const matchesSearch = req.requester.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesOnline = !showOnlineOnly || onlineUsers.includes(req.requester._id);
+
+      return matchesSearch && matchesOnline;
+    });
+  }, [pendingRequests, searchQuery, showOnlineOnly, onlineUsers]);
+
+  // Memoized filtered recommendations
+  const filteredRecommendations = useMemo(() => {
+    if (!authUser?._id) return [];
+    return recommendations.filter((user) => {
+      const hasAnyFriendship = allFriendships.some(
+        (friendship) =>
+          (friendship.requester._id === authUser._id && friendship.recipient._id === user._id) ||
+          (friendship.recipient._id === authUser._id && friendship.requester._id === user._id)
+      );
+
+      const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesOnline = !showOnlineOnly || onlineUsers.includes(user._id);
+
+      return !hasAnyFriendship && matchesSearch && matchesOnline;
+    });
+  }, [recommendations, allFriendships, searchQuery, showOnlineOnly, onlineUsers, authUser?._id]);
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+
+    // Collapse the sidebar on small devices
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  // Early return logic moved to conditional rendering
+  const shouldShowSkeleton = !authUser?._id || isUsersLoading;
 
   return (
     <aside
-      className={`
-        h-full bg-base-100/10 backdrop-blur-2xl transition-all duration-500 ease-in-out
-        ${isSidebarOpen ? "w-full lg:w-80 opacity-100" : "w-0 lg:w-0 opacity-0"}
-        ${
-          isSidebarOpen && window.innerWidth < 1024
-            ? "flex flex-col h-[calc(100%-4rem)]"
-            : "relative border-r border-quaternary/20 h-full"
-        }
-        flex flex-col overflow-x-hidden rounded-tl-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] animate-glassMorph
-      `}
+      className={`h-full bg-base-100/10 backdrop-blur-2xl transition-all duration-500 ease-in-out ${isSidebarOpen ? "w-full lg:w-80 opacity-100" : "w-0 lg:w-0 opacity-0"
+        } flex flex-col overflow-x-hidden rounded-tl-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)]`}
     >
-      <div className="border-b border-quaternary/20 w-full p-3 flex justify-between items-center h-16 bg-base-200/15 backdrop-blur-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] animate-glassMorph">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-quaternary/15 backdrop-blur-2xl shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale">
-            <Users className="size-7 text-tertiary" />
+      {shouldShowSkeleton ? (
+        <SidebarSkeleton />
+      ) : (
+        <>
+          <div className="border-b border-quaternary/20 w-full p-3 flex justify-between items-center h-16 bg-base-200/15 backdrop-blur-2xl">
+            <h2 className="font-semibold text-lg">
+              <UsersRound className="inline-block mr-2" />
+              Contacts
+            </h2>
+            {selectedUser && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2.5 bg-quaternary/15 rounded-full"
+              >
+                <ChevronLeft className="size-7 text-quaternary-content" />
+              </button>
+            )}
           </div>
-          <span className="font-semibold text-lg text-base-content animate-glassMorph">
-            Contacts
-          </span>
-        </div>
-        {selectedUser && (
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-2.5 bg-quaternary/15 backdrop-blur-2xl text-quaternary-content rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-quaternary/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
-            aria-label="Close sidebar"
-          >
-            <ChevronLeft className="size-7 text-quaternary-content" />
-          </button>
-        )}
-      </div>
 
-      {isSidebarOpen && (
-        <div className="p-4 border-b border-quaternary/20 animate-glassMorph">
-          <div className="mt-3">
+          {/* Search Bar and Online Filter */}
+          <div className="p-4 border-b border-quaternary/20">
             <input
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input input-sm input-bordered w-full focus:ring-2 focus:ring-quaternary/50 focus:bg-base-100/15 backdrop-blur-2xl border-base-300/50 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph"
+              className="input input-sm input-bordered w-full focus:ring-2 focus:ring-quaternary/50 focus:bg-base-100/15 backdrop-blur-2xl border-base-300/50 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-500"
             />
-          </div>
-          <div className="mt-3 flex items-center gap-3">
-            <label className="cursor-pointer flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={showOnlineOnly}
-                onChange={(e) => setShowOnlineOnly(e.target.checked)}
-                className="checkbox checkbox-sm border-quaternary/50 animate-glassMorph"
-              />
-              <span className="text-base text-base-content animate-glassMorph">
-                Show online only
+            <div className="mt-3 flex items-center gap-3">
+              <label className="cursor-pointer flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showOnlineOnly}
+                  onChange={(e) => setShowOnlineOnly(e.target.checked)}
+                  className="checkbox checkbox-sm border-quaternary/50"
+                />
+                <span className="text-base text-base-content">Show online only</span>
+              </label>
+              <span className="text-sm text-quaternary/80">
+                ({onlineUsers.length} online)
               </span>
-            </label>
-            <span className="text-sm text-quaternary/80 animate-glassMorph">
-              ({onlineUsers.length - 1} online)
-            </span>
+            </div>
           </div>
-        </div>
-      )}
 
-      <div className="overflow-y-auto w-full py-3">
-        {filteredAndSearchedUsers.map((user, idx) => (
-          <button
-            key={user._id}
-            onClick={() => {
-              setSelectedUser(user);
-              if (window.innerWidth < 1024) setSidebarOpen(false);
-            }}
-            className={`
-              w-full p-3 flex items-center gap-4 transition-all duration-500 animate-glassMorph
-              backdrop-blur-xl border border-white/10 hover:border-white/20
-              ${
-                selectedUser?._id === user._id
-                  ? "bg-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.2)] ring-2 ring-primary/40"
-                  : "hover:bg-white/5"
-              }
-            `}
-            style={{ animationDelay: `${idx * 0.05}s` }}
-          >
-            <div className="relative flex-shrink-0">
-              <img
-                src={user.profilePic || "/avatar.png"}
-                alt={user.fullName}
-                className="size-12 object-cover rounded-full border-2 border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
-              />
-              {onlineUsers.includes(user._id) && (
-                <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-base-100/50 animate-pulseGlow" />
-              )}
-            </div>
-            <div className="flex-1 text-left overflow-hidden">
-              <div className="font-semibold text-lg text-base-content animate-glassMorph">
-                {user.fullName}
+          <div className="overflow-y-auto w-full py-3">
+            {/* Pending Requests */}
+            {filteredPendingRequests.length > 0 && (
+              <div className="sidebar-section">
+                <h3 className="font-semibold text-lg">Pending Requests</h3>
+                {filteredPendingRequests.map((req) => (
+                  <div
+                    key={req._id}
+                    className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={req.requester.profilePic || "/avatar.png"}
+                        alt=""
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <span>{req.requester.fullName}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => acceptFriendRequest(req._id)}
+                        className="btn btn-sm btn-success"
+                      >
+                        <UserCheck2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => rejectFriendRequest(req._id)}
+                        className="btn btn-sm btn-error"
+                      >
+                        <UserRoundX size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <hr className="my-3 border-t border-gray-300" />
               </div>
-              <div className="text-base text-quaternary/80 animate-glassMorph">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
-              </div>
+            )}
+
+            {/* Friends */}
+            <div className="sidebar-section">
+              <h3 className="font-semibold text-lg">Friends</h3>
+              {filteredFriends.map((friend) => {
+                const friendUser =
+                  friend.requester._id === authUser._id ? friend.recipient : friend.requester;
+
+                return (
+                  <div
+                    key={friend._id}
+                    className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                    onClick={() => {
+                      if (friendUser._id !== authUser._id) {
+                        handleUserSelect(friendUser);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`avatar ${onlineUsers.includes(friendUser._id) ? "online" : ""
+                          }`}
+                      >
+                        <div className="w-8 h-8 rounded-full">
+                          <img
+                            src={friendUser.profilePic || "/avatar.png"}
+                            alt="Profile"
+                          />
+                        </div>
+                      </div>
+                      <span>{friendUser.fullName}</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        unfriend(friendUser._id);
+                      }}
+                      className="btn btn-sm btn-warning"
+                    >
+                      <UserMinus2 size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          </button>
-        ))}
-        {filteredAndSearchedUsers.length === 0 && (
-          <div className="text-center text-quaternary/80 py-5 animate-glassMorph">
-            No users found
+
+            {/* Recommendations */}
+            <div className="sidebar-section">
+              <hr className="my-3 border-t border-gray-300" />
+              <h3 className="font-semibold text-lg">Recommendations</h3>
+              {filteredRecommendations.map((user) => (
+                <div
+                  key={user._id}
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`avatar ${onlineUsers.includes(user._id) ? "online" : ""
+                        }`}
+                    >
+                      <div className="w-8 h-8 rounded-full">
+                        <img
+                          src={user.profilePic || "/avatar.png"}
+                          alt="Profile"
+                        />
+                      </div>
+                    </div>
+                    <span>{user.fullName}</span>
+                  </div>
+                  <button
+                    onClick={() => sendFriendRequest(user._id)}
+                    className="btn btn-sm btn-primary"
+                  >
+                    <UserPlus2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </aside>
   );
 };
