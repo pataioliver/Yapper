@@ -1,10 +1,21 @@
 import daisyui from "daisyui";
+import { THEME_COLORS } from "./src/constants/themes.js";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        tertiary: {
+          DEFAULT: "var(--tertiary)",
+          content: "var(--tertiary-content)",
+        },
+        quaternary: {
+          DEFAULT: "var(--quaternary)",
+          content: "var(--quaternary-content)",
+        },
+      },
       animation: {
         fadeIn: "fadeIn 1s ease-in-out",
         slideIn: "slideIn 0.7s ease-in-out",
@@ -69,34 +80,24 @@ export default {
           "50%": { transform: "scale(1.12) translateY(-4px)", boxShadow: "0 0 30px 10px rgba(255, 255, 255, 0.5)", opacity: 1 },
           "100%": { transform: "scale(1) translateY(0)", boxShadow: "0 0 0 0 rgba(255, 255, 255, 0.3)", opacity: 1 },
         },
-        spinSlow: {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-        underlineGrow: {
-          "0%": { width: "0%" },
-          "100%": { width: "100%" },
-        },
       },
       fontFamily: {
-        inter: ["Inter", "sans-serif"],
-        roboto: ["Roboto", "sans-serif"],
-        poppins: ["Poppins", "sans-serif"],
-        montserrat: ["Montserrat", "sans-serif"],
-        opensans: ["Open Sans", "sans-serif"],
-        lato: ["Lato", "sans-serif"],
-        nunito: ["Nunito", "sans-serif"],
-        raleway: ["Raleway", "sans-serif"],
-        orbitron: ["Orbitron", "sans-serif"],
-        georgia: ["Georgia", "serif"],
-        lora: ["Lora", "serif"],
-        merriweather: ["Merriweather", "serif"],
-        robotoMono: ["Roboto Mono", "monospace"],
-        playfair: ["Playfair Display", "serif"],
-        firaCode: ["Fira Code", "monospace"],
-        quicksand: ["Quicksand", "sans-serif"],
-        spaceMono: ["Space Mono", "monospace"],
-        sanfrancisco: ["-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        inter: ['Inter', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
+        orbitron: ['Orbitron', 'sans-serif'],
+        playfair: ['Playfair Display', 'serif'],
+        nunito: ['Nunito', 'sans-serif'],
+        merriweather: ['Merriweather', 'serif'],
+        georgia: ['Georgia', 'serif'],
+        quicksand: ['Quicksand', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+        raleway: ['Raleway', 'sans-serif'],
+        lora: ['Lora', 'serif'],
+        robotoMono: ['Roboto Mono', 'monospace'],
+        poppins: ['Poppins', 'sans-serif'],
+        lato: ['Lato', 'sans-serif'],
+        spaceMono: ['Space Mono', 'monospace'],
+        firaCode: ['Fira Code', 'monospace'],
       },
     },
   },
@@ -119,29 +120,38 @@ export default {
     "font-quicksand",
     "font-spaceMono",
     "font-sanfrancisco",
+    // Color utilities
+    "bg-tertiary",
+    "bg-tertiary/25",
+    "bg-tertiary/50",
+    "border-tertiary",
+    "border-tertiary/50",
+    "text-tertiary-content",
+    "bg-quaternary",
+    "bg-quaternary/25",
+    "bg-quaternary/50",
+    "border-quaternary",
+    "border-quaternary/50",
+    "text-quaternary-content",
   ],
   plugins: [daisyui],
   daisyui: {
-    themes: Object.keys(require("./src/constants/themes.js").THEME_COLORS).map(theme => {
-      const themeColors = require("./src/constants/themes.js").THEME_COLORS[theme];
-      // Detect light theme based on base-100 brightness
-      const isLightTheme = themeColors["base-100"].match(/^#(?:[fF]{6}|[eE][0-9a-fA-F]{5}|[fF][0-9a-fA-F]{5}|[dD][0-9a-fA-F]{5})$/);
+    themes: Object.keys(THEME_COLORS).map(theme => {
+      const themeColors = THEME_COLORS[theme];
+      const isLightTheme = themeColors["base-100"] && /^#(f|e|d)[0-9a-fA-F]{5}$/.test(themeColors["base-100"]);
       return {
         [theme]: {
-          primary: themeColors.primary,
-          secondary: themeColors.secondary,
-          tertiary: themeColors.tertiary,
-          quaternary: themeColors.quaternary,
-          accent: themeColors.tertiary,
-          neutral: themeColors.quaternary,
-          "base-100": themeColors["base-100"],
-          "base-200": themeColors["base-200"],
-          "base-300": themeColors["base-300"],
-          "base-content": isLightTheme ? "#1f2937" : themeColors["base-content"],
-          "primary-content": isLightTheme ? "#111827" : themeColors["primary-content"],
-          "secondary-content": isLightTheme ? "#111827" : themeColors["secondary-content"],
-          "tertiary-content": isLightTheme ? "#111827" : themeColors["tertiary-content"],
-          "quaternary-content": isLightTheme ? "#111827" : themeColors["quaternary-content"],
+          ...themeColors,
+          "--rounded-box": "1rem",
+          "--rounded-btn": "0.5rem",
+          "--rounded-badge": "1.9rem",
+          "--animation-btn": "0.25s",
+          "--animation-input": "0.2s",
+          "--btn-text-case": "normal-case",
+          "--btn-focus-scale": "0.95",
+          "--border-btn": "1px",
+          "--tab-border": "1px",
+          "--tab-radius": "0.5rem",
           "--glow": isLightTheme ? "pulseGlowDark" : "pulseGlow",
         },
       };

@@ -141,11 +141,10 @@ const SettingsPage = () => {
                   return (
                     <button
                       key={t}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-500 animate-glassMorph border border-white/10 ${
-                        previewTheme === t
+                      className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-500 animate-glassMorph border border-white/10 ${previewTheme === t
                           ? "scale-110 ring-2 ring-primary/80 shadow-[0_0_25px_var(--primary)] animate-bounceInScale z-10"
                           : "hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-                      } ${isAnimating ? "animate-modernThemeSelect scale-110 z-20" : ""}`}
+                        } ${isAnimating ? "animate-modernThemeSelect scale-110 z-20" : ""}`}
                       onClick={() => handleThemeSelect(t)}
                       data-theme={t}
                       style={{
