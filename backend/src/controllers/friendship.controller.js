@@ -131,3 +131,19 @@ export const unfriend = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
+export const getAllFriendships = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const friendships = await Friendship.find({
+            $or: [
+                { requester: userId },
+                { recipient: userId },
+            ],
+        }).populate("requester recipient", "-password");
+        res.json(friendships);
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch friendships.' });
+    }
+}

@@ -7,6 +7,7 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
   friends: [],
+  allFriendships: [],
   pendingRequests: [],
   recommendations: [],
   selectedUser: null,
@@ -15,6 +16,7 @@ export const useChatStore = create((set, get) => ({
   isSidebarOpen: window.innerWidth >= 1024,
   replyingTo: null,
 
+  // ...existing code...
   fetchFriendshipData: async () => {
     set({ isUsersLoading: true });
     try {
@@ -22,13 +24,20 @@ export const useChatStore = create((set, get) => ({
       const friendsRes = await axiosInstance.get("/api/friendship/friends");
       set({ friends: friendsRes.data });
 
+      // Fetch all friendships
+      const allFriendshipsRes = await axiosInstance.get("/api/friendship/all");
+      set({ allFriendships: allFriendshipsRes.data });
+
       // Fetch pending requests
       const pendingRes = await axiosInstance.get("/api/friendship/pending");
       set({ pendingRequests: pendingRes.data });
 
       // Fetch all users for recommendations
       const usersRes = await axiosInstance.get("/api/messages/users");
-      const myUserId = get().selectedUser?._id;
+
+      // FIX: Use the authenticated user's ID
+      const authUser = useAuthStore.getState().authUser;
+      const myUserId = authUser?._id;
 
       // Filter recommendations (not friends, not pending, not self)
       const friendIds = friendsRes.data.map((f) =>
@@ -49,6 +58,7 @@ export const useChatStore = create((set, get) => ({
       set({ isUsersLoading: false });
     }
   },
+
 
   // Accept a friend request
   acceptFriendRequest: async (requestId) => {
@@ -154,14 +164,14 @@ export const useChatStore = create((set, get) => ({
       messages: state.messages.map((msg) =>
         msg._id === messageId
           ? {
-              ...msg,
-              reactions: [
-                ...msg.reactions.filter(
-                  (r) => !(r.label === reaction.label && r.userId === reaction.userId)
-                ),
-                reaction,
-              ],
-            }
+            ...msg,
+            reactions: [
+              ...msg.reactions.filter(
+                (r) => !(r.label === reaction.label && r.userId === reaction.userId)
+              ),
+              reaction,
+            ],
+          }
           : msg
       ),
     }));
