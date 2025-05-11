@@ -1,8 +1,20 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import Friendship from "../models/friendship.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+
+
+export const areUsersFriends = async (userId1, userId2) => {
+  const friendship = await Friendship.findOne({
+    $or: [
+      { requester: userId1, recipient: userId2, status: "accepted" },
+      { requester: userId2, recipient: userId1, status: "accepted" },
+    ],
+  });
+  return !!friendship;
+};
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -40,6 +52,11 @@ export const sendMessage = async (req, res) => {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+
+    const friends = await areUsersFriends(senderId, receiverId);
+    if (!friends) {
+      return res.status(403).json({ error: "You are not friends with this user." });
+    }
 
     let imageUrl;
     if (image) {
