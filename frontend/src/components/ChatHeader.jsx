@@ -10,7 +10,7 @@ const ChatHeader = () => {
     <div className="p-4 border-b border-quaternary/20 h-16 flex items-center bg-base-100/10 backdrop-blur-2xl rounded-tl-none rounded-tr-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 animate-glassMorph">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4">
-          {selectedUser && !isSidebarOpen && (
+          {selectedUser &&  (
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2.5 bg-quaternary/15 backdrop-blur-2xl text-quaternary-content rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-quaternary/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
@@ -35,7 +35,10 @@ const ChatHeader = () => {
           </div>
         </div>
         <button
-          onClick={() => setSelectedUser(null)}
+          onClick={() => {
+            setSelectedUser(null);
+            setSidebarOpen(true); // Open the sidebar
+          }}
           className="p-2.5 bg-tertiary/15 backdrop-blur-2xl text-tertiary-content rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-tertiary/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
           aria-label="Close chat"
         >
