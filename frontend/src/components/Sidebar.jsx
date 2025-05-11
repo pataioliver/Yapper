@@ -121,7 +121,7 @@ const Sidebar = () => {
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input input-sm input-bordered w-full focus:ring-2 focus:ring-quaternary/50 focus:bg-base-100/15 backdrop-blur-2xl border-base-300/50 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-500"
+              className="input text-base sm:text- lg w-full focus:ring-2 focus:ring-quaternary/50 focus:bg-base-100/15 backdrop-blur-2xl border-base-300/50 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-500"
             />
             <div className="mt-3 flex items-center gap-3">
               <label className="cursor-pointer flex items-center gap-2">
