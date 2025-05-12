@@ -29,37 +29,28 @@ const Sidebar = () => {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
-    fetchFriendshipData();
-
-    // Automatically open the sidebar on small devices
-    if (window.innerWidth < 768) {
-      setSidebarOpen(true);
-      setselectedChat(null); // Ensure no chat is selected initially
-    }
+    const fetchData = async () => {
+      await fetchFriendshipData();
+      // Automatically open the sidebar on small devices
+      if (window.innerWidth < 768) {
+        setSidebarOpen(true);
+        setselectedChat(null); // Ensure no chat is selected initially
+      }
+    };
+    fetchData();
   }, [fetchFriendshipData, setSidebarOpen, setselectedChat]);
 
-  // Memoized filtered friends
+
   const filteredFriends = useMemo(() => {
-    return friends.filter((friend) => {
-      const friendUser =
-        friend.requester._id === authUser._id ? friend.recipient : friend.requester;
-
-      const matchesSearch = friendUser.fullName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesOnline = !showOnlineOnly || onlineUsers.includes(friendUser._id);
-
-      return matchesSearch && matchesOnline;
-    });
-  }, [friends, searchQuery, showOnlineOnly, onlineUsers, authUser._id]);
-
-  // Memoized filtered pending requests
-  const filteredPendingRequests = useMemo(() => {
-    return pendingRequests.filter((req) => {
-      const matchesSearch = req.requester.fullName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesOnline = !showOnlineOnly || onlineUsers.includes(req.requester._id);
-
-      return matchesSearch && matchesOnline;
-    });
-  }, [pendingRequests, searchQuery, showOnlineOnly, onlineUsers]);
+    return friends
+      .filter(Boolean)
+      .filter((friend) => {
+        if (!friend || !friend.fullName || !friend._id) return false;
+        const matchesSearch = friend.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesOnline = !showOnlineOnly || onlineUsers.includes(friend._id);
+        return matchesSearch && matchesOnline;
+      });
+  }, [friends, searchQuery, showOnlineOnly, onlineUsers]);
 
   // Memoized filtered recommendations
   const filteredRecommendations = useMemo(() => {
@@ -78,6 +69,17 @@ const Sidebar = () => {
     });
   }, [recommendations, allFriendships, searchQuery, showOnlineOnly, onlineUsers, authUser?._id]);
 
+  const filteredPendingRequests = useMemo(() => {
+    if (!authUser?._id) return [];
+    return pendingRequests.filter((req) => {
+      // Defensive: check requester existence and filter by search/online if needed
+      if (!req || !req.requester || !req.requester.fullName || !req.requester._id) return false;
+      const matchesSearch = req.requester.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesOnline = !showOnlineOnly || onlineUsers.includes(req.requester._id);
+      return matchesSearch && matchesOnline;
+    });
+  }, [pendingRequests, searchQuery, showOnlineOnly, onlineUsers, authUser?._id]);
+
   const handleUserSelect = (user) => {
     setselectedChat(user);
 
@@ -87,7 +89,7 @@ const Sidebar = () => {
     }
   };
 
-  // Early return logic moved to conditional rendering
+
   const shouldShowSkeleton = !authUser?._id || isUsersLoading;
 
   return (
@@ -180,46 +182,38 @@ const Sidebar = () => {
             {/* Friends */}
             <div className="sidebar-section">
               <h3 className="font-semibold text-lg">Friends</h3>
-              {filteredFriends.map((friend) => {
-                const friendUser =
-                  friend.requester._id === authUser._id ? friend.recipient : friend.requester;
-
-                return (
-                  <div
-                    key={friend._id}
-                    className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
-                    onClick={() => {
-                      if (friendUser._id !== authUser._id) {
-                        handleUserSelect(friendUser);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`avatar ${onlineUsers.includes(friendUser._id) ? "online" : ""
-                          }`}
-                      >
-                        <div className="w-8 h-8 rounded-full">
-                          <img
-                            src={friendUser.profilePic || "/avatar.png"}
-                            alt="Profile"
-                          />
-                        </div>
+              {filteredFriends.map((friend) => (
+                <div
+                  key={friend._id}
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                  onClick={() => {
+                    if (friend._id !== authUser._id) {
+                      handleUserSelect(friend);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`avatar ${onlineUsers.includes(friend._id) ? "online" : ""}`}>
+                      <div className="w-8 h-8 rounded-full">
+                        <img
+                          src={friend.profilePic || "/avatar.png"}
+                          alt={friend.fullName || "Profile"}
+                        />
                       </div>
-                      <span>{friendUser.fullName}</span>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        unfriend(friendUser._id);
-                      }}
-                      className="btn btn-sm btn-warning"
-                    >
-                      <UserMinus2 size={16} />
-                    </button>
+                    <span>{friend.fullName || "Unknown"}</span>
                   </div>
-                );
-              })}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      unfriend(friend._id);
+                    }}
+                    className="btn btn-sm btn-warning"
+                  >
+                    <UserMinus2 size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
 
             {/* Recommendations */}

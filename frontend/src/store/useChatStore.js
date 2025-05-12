@@ -16,13 +16,31 @@ export const useChatStore = create((set, get) => ({
   isSidebarOpen: window.innerWidth >= 1024,
   replyingTo: null,
 
-  // ...existing code...
+
   fetchFriendshipData: async () => {
     set({ isUsersLoading: true });
     try {
-      // Fetch friends
+      // Fetch friends (friendship objects)
       const friendsRes = await axiosInstance.get("/api/friendship/friends");
-      set({ friends: friendsRes.data });
+      // Fetch all users for recommendations and to get full user data
+      const usersRes = await axiosInstance.get("/api/messages/users");
+      const allUsers = usersRes.data;
+
+      // Get current user ID
+      const authUser = useAuthStore.getState().authUser;
+      const myUserId = authUser?._id;
+
+      // Map friendships to actual friend user objects
+      const friends = friendsRes.data
+        .map(f => {
+          // Find the friend user ID (not yourself)
+          const friendId = f.requester._id === myUserId ? f.recipient._id : f.requester._id;
+          // Find the full user object from allUsers
+          return allUsers.find(u => u._id === friendId);
+        })
+        .filter(Boolean); // Remove any undefined (in case user not found)
+
+      set({ friends });
 
       // Fetch all friendships
       const allFriendshipsRes = await axiosInstance.get("/api/friendship/all");
@@ -32,26 +50,17 @@ export const useChatStore = create((set, get) => ({
       const pendingRes = await axiosInstance.get("/api/friendship/pending");
       set({ pendingRequests: pendingRes.data });
 
-      // Fetch all users for recommendations
-      const usersRes = await axiosInstance.get("/api/messages/users");
-
-      // FIX: Use the authenticated user's ID
-      const authUser = useAuthStore.getState().authUser;
-      const myUserId = authUser?._id;
-
       // Filter recommendations (not friends, not pending, not self)
-      const friendIds = friendsRes.data.map((f) =>
-        f.requester._id === myUserId ? f.recipient._id : f.requester._id
-      );
+      const friendIds = friends.map(f => f._id);
       const pendingIds = pendingRes.data.map((p) => p.requester._id);
-      const recommendations = usersRes.data.filter(
+      const recommendations = allUsers.filter(
         (u) =>
           u._id !== myUserId &&
           !friendIds.includes(u._id) &&
           !pendingIds.includes(u._id)
       );
 
-      set({ recommendations, users: usersRes.data });
+      set({ recommendations, users: allUsers });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to fetch data");
     } finally {
@@ -236,4 +245,15 @@ export const useChatStore = create((set, get) => ({
     set({ selectedChat: null });
   },
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+
+  createGroup: async ({ name, members }) => {
+    try {
+      const res = await axiosInstance.post("/api/groups", { name, members });
+      toast.success("Group created!");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create group");
+      throw error;
+    }
+  },
 }));
