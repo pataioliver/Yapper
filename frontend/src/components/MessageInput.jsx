@@ -22,6 +22,7 @@ const MessageInput = () => {
       await sendMessage({ text, image });
       setText("");
       setImage(null);
+      setReplyingTo(null);
     } catch (error) {
       console.error("Failed to send message:", error);
     }

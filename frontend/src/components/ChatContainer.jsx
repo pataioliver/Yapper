@@ -11,11 +11,12 @@ import { Reply } from "lucide-react";
 
 const ChatContainer = () => {
   const { messages, getMessages, isMessagesLoading, selectedChat, subscribeToMessages, unsubscribeFromMessages, addReaction, setReplyingTo, isSidebarOpen } = useChatStore();
-  const { authUser } = useAuthStore();
+  const { authUser, joinRoom, leaveRoom } = useAuthStore();
   const messageEndRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const hasLoadedMessages = useRef(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (selectedChat?._id && !hasLoadedMessages.current) {
@@ -28,6 +29,13 @@ const ChatContainer = () => {
       if (selectedChat?._id) hasLoadedMessages.current = false;
     };
   }, [selectedChat?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+
+  useEffect(() => {
+    if (selectedChat?.type === "group" && selectedChat.group?._id) {
+      joinRoom(selectedChat.group._id);
+      return () => leaveRoom(selectedChat.group._id);
+    }
+  }, [selectedChat?.type, selectedChat?.group?._id]);
 
   useEffect(() => {
     if (messageEndRef.current && messages && !initialScrollDone) {

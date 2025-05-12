@@ -30,6 +30,33 @@ io.on("connection", (socket) => {
   // io.emit() is used to send events to all the connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+  // --- GROUP CHAT  ---
+  socket.on("join", ({ roomId }) => {
+    socket.join(roomId);
+    // Optionally: console.log(`${userId} joined room ${roomId}`);
+    console.log(`${userId} joined room ${roomId}`);
+  });
+
+  socket.on("leave", ({ roomId }) => {
+    socket.leave(roomId);
+    // Optionally: console.log(`${userId} left room ${roomId}`);
+    console.log(`${userId} left room ${roomId}`);
+  });
+
+  // Listen for group messages
+  socket.on("sendGroupMessage", ({ roomId, message }) => {
+    // Save message to DB here if needed
+    io.to(roomId).emit("newGroupMessage", message);
+  });
+
+  // --- DM Message ---
+  socket.on("sendDirectMessage", ({ toUserId, message }) => {
+    const receiverSocketId = userSocketMap[toUserId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newDirectMessage", message);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     delete userSocketMap[userId];
