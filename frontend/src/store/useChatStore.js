@@ -7,6 +7,7 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
   friends: [],
+  groups: [],
   allFriendships: [],
   pendingRequests: [],
   recommendations: [],
@@ -113,22 +114,36 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  getMessages: async (userId) => {
-    set({ isMessagesLoading: true });
-    try {
-      const res = await axiosInstance.get(`api/messages/${userId}`);
-      const messagesWithReactions = res.data.map((msg) => ({
-        ...msg,
-        reactions: msg.reactions || [],
-        replyToId: msg.replyToId || null,
-      }));
-      set({ messages: messagesWithReactions });
-    } catch (error) {
-      toast.error(error.response.data.message);
-    } finally {
+  getMessages: async () => {
+  set({ isMessagesLoading: true });
+  try {
+    const { selectedChat } = get();
+    let res;
+
+    if (selectedChat?.type === "group") {
+      // Fetch group messages
+      res = await axiosInstance.get(`/api/groups/${selectedChat.group._id}/messages`);
+    } else if (selectedChat?.type === "user") {
+      // Fetch DM messages
+      res = await axiosInstance.get(`/api/messages/${selectedChat.user._id}`);
+    } else {
+      set({ messages: [] });
       set({ isMessagesLoading: false });
+      return;
     }
-  },
+
+    const messagesWithReactions = res.data.map((msg) => ({
+      ...msg,
+      reactions: msg.reactions || [],
+      replyToId: msg.replyToId || null,
+    }));
+    set({ messages: messagesWithReactions });
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to fetch messages");
+  } finally {
+    set({ isMessagesLoading: false });
+  }
+},
 
   sendMessage: async (messageData) => {
     const { selectedChat, messages, replyingTo } = get();
@@ -254,6 +269,15 @@ export const useChatStore = create((set, get) => ({
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create group");
       throw error;
+    }
+  },
+
+  fetchGroups: async () => {
+    try {
+      const res = await axiosInstance.get("/api/groups");
+      set({ groups: res.data });
+    } catch (error) {
+      toast.error("Failed to fetch groups");
     }
   },
 }));

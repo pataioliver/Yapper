@@ -20,6 +20,8 @@ const Sidebar = () => {
     setSidebarOpen,
     isUsersLoading,
     allFriendships,
+    groups,
+    fetchGroups,
   } = useChatStore();
 
   const { authUser, onlineUsers } = useAuthStore();
@@ -31,6 +33,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchData = async () => {
       await fetchFriendshipData();
+      await fetchGroups();
       // Automatically open the sidebar on small devices
       if (window.innerWidth < 768) {
         setSidebarOpen(true);
@@ -38,7 +41,7 @@ const Sidebar = () => {
       }
     };
     fetchData();
-  }, [fetchFriendshipData, setSidebarOpen, setselectedChat]);
+  }, [fetchFriendshipData, fetchGroups, setSidebarOpen, setselectedChat]);
 
 
   const filteredFriends = useMemo(() => {
@@ -212,6 +215,33 @@ const Sidebar = () => {
                   >
                     <UserMinus2 size={16} />
                   </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Groups */}
+            <div className="sidebar-section">
+              <h3 className="font-semibold text-lg">Groups</h3>
+              {groups.length === 0 && (
+                <div className="text-sm text-quaternary-content px-2 py-4">No groups found.</div>
+              )}
+              {groups.map(group => (
+                <div
+                  key={group._id}
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                  onClick={() => setselectedChat({ type: "group", group, _id: group._id })}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="avatar">
+                      <div className="w-8 h-8 rounded-full">
+                        <img
+                          src={group.avatar || "/group.png"}
+                          alt={group.name || "Group"}
+                        />
+                      </div>
+                    </div>
+                    <span>{group.name || "Unnamed Group"}</span>
+                  </div>
                 </div>
               ))}
             </div>
