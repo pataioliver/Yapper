@@ -10,7 +10,7 @@ export const useChatStore = create((set, get) => ({
   allFriendships: [],
   pendingRequests: [],
   recommendations: [],
-  selectedUser: null,
+  selectedChat: null,
   isUsersLoading: false,
   isMessagesLoading: false,
   isSidebarOpen: window.innerWidth >= 1024,
@@ -122,34 +122,63 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async (messageData) => {
-    const { selectedUser, messages, replyingTo } = get();
+    const { selectedChat, messages, replyingTo } = get();
     try {
       const payload = {
         ...messageData,
         replyToId: replyingTo?._id || null,
       };
-      const res = await axiosInstance.post(`api/messages/send/${selectedUser._id}`, payload);
+
+      let res;
+      if (selectedChat?.type === "group") {
+        // Send to group endpoint
+        res = await axiosInstance.post(
+          `/api/groups/${selectedChat.group._id}/messages`,
+          payload
+        );
+      } else if (selectedChat?.type === "user") {
+        // Send to DM endpoint
+        res = await axiosInstance.post(
+          `/api/messages/send/${selectedChat.user._id}`,
+          payload
+        );
+      } else {
+        throw new Error("No chat selected");
+      }
+
       set({
         messages: [...messages, { ...res.data, reactions: [], replyToId: payload.replyToId }],
         replyingTo: null,
       });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to send message");
     }
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
+    const { selectedChat, unsubscribeFromMessages } = get();
+    if (!selectedChat) return;
+
+    // Unsubscribe from previous subscriptions
+    unsubscribeFromMessages();
 
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      // You may want to check if the message belongs to the current chat
+      const isGroup = selectedChat.type === "group";
+      const chatId = isGroup ? selectedChat.group._id : selectedChat.user._id;
+      const isMessageForThisChat = isGroup
+        ? newMessage.groupId === chatId
+        : (newMessage.senderId === chatId || newMessage.receiverId === chatId);
+
+      if (!isMessageForThisChat) return;
 
       set({
-        messages: [...get().messages, { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null }],
+        messages: [
+          ...get().messages,
+          { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null },
+        ],
       });
     });
   },
@@ -179,6 +208,32 @@ export const useChatStore = create((set, get) => ({
 
   setReplyingTo: (message) => set({ replyingTo: message }),
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setselectedChat: (chat) => {
+    // If already has a type, just use it
+    if (chat?.type) return set({ selectedChat: chat });
+
+    // If it has a 'user' property, it's a DM
+    if (chat?.user) {
+      return set({ selectedChat: { ...chat, type: "user" } });
+    }
+
+    // If it has a 'group' property, it's a group chat
+    if (chat?.group) {
+      return set({ selectedChat: { ...chat, type: "group" } });
+    }
+
+    // If it's a plain user object
+    if (chat?.fullName && chat?._id) {
+      return set({ selectedChat: { user: chat, type: "user", _id: chat._id } });
+    }
+
+    // If it's a plain group object
+    if (chat?.name && chat?.members) {
+      return set({ selectedChat: { group: chat, type: "group", _id: chat._id } });
+    }
+
+    // Fallback
+    set({ selectedChat: null });
+  },
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
 }));

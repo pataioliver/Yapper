@@ -14,8 +14,8 @@ const Sidebar = () => {
     rejectFriendRequest,
     sendFriendRequest,
     unfriend,
-    setSelectedUser,
-    selectedUser,
+    setselectedChat,
+    selectedChat,
     isSidebarOpen,
     setSidebarOpen,
     isUsersLoading,
@@ -34,9 +34,9 @@ const Sidebar = () => {
     // Automatically open the sidebar on small devices
     if (window.innerWidth < 768) {
       setSidebarOpen(true);
-      setSelectedUser(null); // Ensure no chat is selected initially
+      setselectedChat(null); // Ensure no chat is selected initially
     }
-  }, [fetchFriendshipData, setSidebarOpen, setSelectedUser]);
+  }, [fetchFriendshipData, setSidebarOpen, setselectedChat]);
 
   // Memoized filtered friends
   const filteredFriends = useMemo(() => {
@@ -79,7 +79,7 @@ const Sidebar = () => {
   }, [recommendations, allFriendships, searchQuery, showOnlineOnly, onlineUsers, authUser?._id]);
 
   const handleUserSelect = (user) => {
-    setSelectedUser(user);
+    setselectedChat(user);
 
     // Collapse the sidebar on small devices
     if (window.innerWidth < 768) {
@@ -104,7 +104,7 @@ const Sidebar = () => {
               <UsersRound className="inline-block mr-2" />
               Contacts
             </h2>
-            {selectedUser && (
+            {selectedChat && (
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="p-2.5 bg-quaternary/15 rounded-full"

@@ -3,7 +3,7 @@ import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 
 const MessageInput = () => {
-  const { sendMessage, selectedUser, replyingTo, setReplyingTo } = useChatStore();
+  const { sendMessage, selectedChat, replyingTo, setReplyingTo } = useChatStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
 
@@ -39,7 +39,17 @@ const MessageInput = () => {
       {replyingTo && (
         <div className="mb-2 p-2 bg-base-200/20 backdrop-blur-lg rounded-lg flex items-center justify-between shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-glassMorph">
           <div>
-            <p className="text-xs text-quaternary-content">Replying to {replyingTo.senderId === selectedUser._id ? selectedUser.fullName : "You"}</p>
+            <p className="text-xs text-quaternary-content">
+              Replying to {
+                replyingTo.senderId === (selectedChat?.type === "user"
+                  ? selectedChat?.user?._id
+                  : selectedChat?.group?._id)
+                  ? (selectedChat?.type === "user"
+                    ? selectedChat?.user?.fullName
+                    : selectedChat?.group?.name)
+                  : "You"
+              }
+            </p>
             <p className="text-sm truncate max-w-[200px] text-quaternary-content">{replyingTo.text || (replyingTo.image && "Image")}</p>
           </div>
           <button

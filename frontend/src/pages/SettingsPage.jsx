@@ -79,7 +79,7 @@ const SettingsPage = () => {
   };
 
   const authUser = { _id: "user2", fullName: "You" };
-  const selectedUser = { _id: "user1", fullName: "Ariana Grande" };
+  const selectedChat = { _id: "user1", fullName: "Ariana Grande" };
 
   const getQuotedMessage = (replyToId) => PREVIEW_MESSAGES.find((msg) => msg.id === replyToId);
 
@@ -229,14 +229,14 @@ const SettingsPage = () => {
                             <div className="chat-image avatar">
                               <div className="size-8 rounded-full border border-quaternary/50">
                                 <img
-                                  src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedUser.profilePic || "/avatar.png"}
+                                  src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedChat.profilePic || "/avatar.png"}
                                   alt="profile pic"
                                   className="rounded-full"
                                 />
                               </div>
                             </div>
                             <div className="chat-header mb-1">
-                              <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedUser.fullName}</time>
+                              <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedChat.fullName}</time>
                             </div>
                             <div
                               className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
@@ -245,7 +245,7 @@ const SettingsPage = () => {
                               {quotedMessage && (
                                 <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
                                   <p className="text-xs text-quaternary-content">
-                                    {quotedMessage.senderId === authUser._id ? "You" : selectedUser.fullName}
+                                    {quotedMessage.senderId === authUser._id ? "You" : selectedChat.fullName}
                                   </p>
                                   <p className="text-xs truncate max-w-[120px] text-quaternary-content">{quotedMessage.content}</p>
                                 </div>
@@ -327,14 +327,14 @@ const SettingsPage = () => {
                           <div className="chat-image avatar">
                             <div className="size-10 rounded-full border border-quaternary/50">
                               <img
-                                src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedUser.profilePic || "/avatar.png"}
+                                src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedChat.profilePic || "/avatar.png"}
                                 alt="profile pic"
                                 className="rounded-full"
                               />
                             </div>
                           </div>
                           <div className="chat-header mb-1">
-                            <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedUser.fullName}</time>
+                            <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedChat.fullName}</time>
                           </div>
                           <div
                             className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
@@ -343,7 +343,7 @@ const SettingsPage = () => {
                             {quotedMessage && (
                               <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
                                 <p className="text-xs text-quaternary-content">
-                                  {quotedMessage.senderId === authUser._id ? "You" : selectedUser.fullName}
+                                  {quotedMessage.senderId === authUser._id ? "You" : selectedChat.fullName}
                                 </p>
                                 <p className="text-xs truncate max-w-[150px] text-quaternary-content">{quotedMessage.content}</p>
                               </div>

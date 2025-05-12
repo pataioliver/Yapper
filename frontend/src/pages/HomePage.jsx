@@ -4,7 +4,7 @@ import NoChatSelected from "../components/NoChatSelected";
 import ChatContainer from "../components/ChatContainer";
 
 const HomePage = () => {
-  const { selectedUser } = useChatStore();
+  const { selectedChat } = useChatStore();
 
   return (
     <div className="min-h-screen backdrop-blur-xl animate-glassMorphPulse">
@@ -12,7 +12,7 @@ const HomePage = () => {
         <div className="bg-base-100/85 backdrop-blur-xl rounded-2xl shadow-[0_0_25px_rgba(255,255,255,0.3)] w-full max-w-6xl h-[calc(100vh-8rem)] transition-all duration-500 animate-glassMorphPulse border border-base-content/20">
           <div className="flex h-full rounded-2xl overflow-hidden animate-popIn" style={{ animationDelay: "0.2s" }}>
             <Sidebar />
-            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            {!selectedChat ? <NoChatSelected /> : <ChatContainer />}
           </div>
         </div>
       </div>
