@@ -58,7 +58,7 @@ const VerifyEmailPage = () => {
           <div className="form-control animate-glassMorph" style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
               <input
-                type="text"
+                type="number"
                 className="w-full pl-12 pr-5 py-3 sm:py-4 bg-base-100/70 backdrop-blur-sm rounded-xl border border-base-content/10 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 text-base-content placeholder-base-content/50 transition-all duration-300 hover:bg-base-100/90 focus:bg-base-100 text-sm sm:text-base"
                 placeholder="Enter your code"
                 value={verificationCode}
