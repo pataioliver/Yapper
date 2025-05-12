@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import friendshipRoutes from "./routes/friendship.routes.js";
 import groupRoutes from "./routes/group.route.js";
+import pushRoutes from "./routes/push.route.js";
 
 import { app, server } from "./lib/socket.js";
 
@@ -32,13 +33,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/friendship", friendshipRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/push", pushRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.use(express.static(path.join(__dirname, "../frontend")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));  });
 }
 
 server.listen(PORT, () => {
