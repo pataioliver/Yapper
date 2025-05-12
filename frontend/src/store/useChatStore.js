@@ -7,21 +7,25 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
   friends: [],
+  groups: [],
   allFriendships: [],
   pendingRequests: [],
   recommendations: [],
-  selectedUser: null,
+  selectedChat: null,
   isUsersLoading: false,
   isMessagesLoading: false,
   isSidebarOpen: window.innerWidth >= 1024,
   replyingTo: null,
 
+
   fetchFriendshipData: async () => {
     set({ isUsersLoading: true });
     try {
+      // Fetch friends (friendship objects)
       const friendsRes = await axiosInstance.get("/api/friendship/friends");
       set({ friends: friendsRes.data });
 
+      // Fetch all friendships
       const allFriendshipsRes = await axiosInstance.get("/api/friendship/all");
       set({ allFriendships: allFriendshipsRes.data });
 
@@ -37,14 +41,14 @@ export const useChatStore = create((set, get) => ({
         f.requester._id === myUserId ? f.recipient._id : f.requester._id
       );
       const pendingIds = pendingRes.data.map((p) => p.requester._id);
-      const recommendations = usersRes.data.filter(
+      const recommendations = allUsers.filter(
         (u) =>
           u._id !== myUserId &&
           !friendIds.includes(u._id) &&
           !pendingIds.includes(u._id)
       );
 
-      set({ recommendations, users: usersRes.data });
+      set({ recommendations, users: allUsers });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to fetch data");
     } finally {
@@ -95,7 +99,21 @@ export const useChatStore = create((set, get) => ({
    getMessages: async (userId) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`api/messages/${userId}`);
+      const { selectedChat } = get();
+      let res;
+
+      if (selectedChat?.type === "group") {
+        // Fetch group messages
+        res = await axiosInstance.get(`/api/groups/${selectedChat.group._id}/messages`);
+      } else if (selectedChat?.type === "user") {
+        // Fetch DM messages
+        res = await axiosInstance.get(`/api/messages/${selectedChat.user._id}`);
+      } else {
+        set({ messages: [] });
+        set({ isMessagesLoading: false });
+        return;
+      }
+
       const messagesWithReactions = res.data.map((msg) => ({
         ...msg,
         reactions: msg.reactions || [],
@@ -105,67 +123,123 @@ export const useChatStore = create((set, get) => ({
       const usersRes = await axiosInstance.get("/api/messages/users");
       set({ messages: messagesWithReactions, users: usersRes.data });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to fetch messages");
     } finally {
       set({ isMessagesLoading: false });
     }
   },
 
   sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
+    const { selectedChat, messages, replyingTo } = get();
+    const socket = useAuthStore.getState().socket;
     try {
       const payload = {
         ...messageData,
+        replyToId: replyingTo?._id || null,
       };
-      const res = await axiosInstance.post(`api/messages/send/${selectedUser._id}`, payload);
+
+      let res;
+      if (selectedChat?.type === "group") {
+        // Send to group endpoint (HTTP)
+        res = await axiosInstance.post(
+          `/api/groups/${selectedChat.group._id}/messages`,
+          payload
+        );
+        // Emit via socket for real-time update
+        if (socket) {
+          socket.emit("sendGroupMessage", {
+            roomId: selectedChat.group._id,
+            message: res.data,
+          });
+        }
+      } else if (selectedChat?.type === "user") {
+        // Send to DM endpoint (HTTP)
+        res = await axiosInstance.post(
+          `/api/messages/send/${selectedChat.user._id}`,
+          payload
+        );
+        // Emit via socket for real-time update
+        if (socket) {
+          socket.emit("sendDirectMessage", {
+            toUserId: selectedChat.user._id,
+            message: res.data,
+          });
+        }
+      } else {
+        throw new Error("No chat selected");
+      }
+
       set({
         messages: [...messages, { ...res.data, reactions: res.data.reactions || [], replyToId: res.data.replyToId || null }],
         replyingTo: null,
       });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to send message");
     }
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
+    const { selectedChat, unsubscribeFromMessages } = get();
+    if (!selectedChat) return;
+
+    // Unsubscribe from previous subscriptions
+    unsubscribeFromMessages();
 
     const socket = useAuthStore.getState().socket;
 
-    socket.on("newMessage", (newMessage) => {
-      // Only add if the message is for the current chat
+    // Handler for group messages
+    const handleGroupMessage = (newMessage) => {
       if (
-        newMessage.senderId === selectedUser._id ||
-        newMessage.receiverId === selectedUser._id
+        selectedChat.type === "group" &&
+        newMessage.groupId === selectedChat.group._id
       ) {
-        set({
-          messages: [...get().messages, { ...newMessage, reactions: newMessage.reactions || [], replyToId: newMessage.replyToId || null }],
-        });
+        const currentMessages = get().messages;
+        // Only add if not already present
+        if (!currentMessages.some(msg => msg._id === newMessage._id)) {
+          set({
+            messages: [
+              ...currentMessages,
+              { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null },
+            ],
+          });
+        }
       }
-    });
+    };
 
-    socket.on("messageReaction", ({ messageId, emoji, userId }) => {
-      set((state) => ({
-        messages: state.messages.map((msg) =>
-          msg._id === messageId
-            ? {
-                ...msg,
-                reactions: [
-                  ...msg.reactions.filter((r) => r.userId !== userId),
-                  { emoji, userId },
-                ],
-              }
-            : msg
-        ),
-      }));
-    });
+    const handleDirectMessage = (newMessage) => {
+      if (
+        selectedChat.type === "user" &&
+        (
+          newMessage.senderId === selectedChat.user._id ||
+          newMessage.receiverId === selectedChat.user._id
+        )
+      ) {
+        const currentMessages = get().messages;
+        // Only add if not already present
+        if (!currentMessages.some(msg => msg._id === newMessage._id)) {
+          set({
+            messages: [
+              ...currentMessages,
+              { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null },
+            ],
+          });
+        }
+      }
+    };
+
+    socket.on("newGroupMessage", handleGroupMessage);
+    socket.on("newDirectMessage", handleDirectMessage);
+
+    // Save handlers for cleanup
+    set({ _groupMsgHandler: handleGroupMessage, _directMsgHandler: handleDirectMessage });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
-    socket.off("messageReaction");
+    const { _groupMsgHandler, _directMsgHandler } = get();
+    if (_groupMsgHandler) socket.off("newGroupMessage", _groupMsgHandler);
+    if (_directMsgHandler) socket.off("newDirectMessage", _directMsgHandler);
+    set({ _groupMsgHandler: null, _directMsgHandler: null });
   },
 
   addReaction: async (messageId, reaction) => {
@@ -179,6 +253,52 @@ export const useChatStore = create((set, get) => ({
 
   setReplyingTo: (message) => set({ replyingTo: message }),
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setselectedChat: (chat) => {
+    // If already has a type, just use it
+    if (chat?.type) return set({ selectedChat: chat });
+
+    // If it has a 'user' property, it's a DM
+    if (chat?.user) {
+      return set({ selectedChat: { ...chat, type: "user" } });
+    }
+
+    // If it has a 'group' property, it's a group chat
+    if (chat?.group) {
+      return set({ selectedChat: { ...chat, type: "group" } });
+    }
+
+    // If it's a plain user object
+    if (chat?.fullName && chat?._id) {
+      return set({ selectedChat: { user: chat, type: "user", _id: chat._id } });
+    }
+
+    // If it's a plain group object
+    if (chat?.name && chat?.members) {
+      return set({ selectedChat: { group: chat, type: "group", _id: chat._id } });
+    }
+
+    // Fallback
+    set({ selectedChat: null });
+  },
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+
+  createGroup: async ({ name, members }) => {
+    try {
+      const res = await axiosInstance.post("/api/groups", { name, members });
+      toast.success("Group created!");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create group");
+      throw error;
+    }
+  },
+
+  fetchGroups: async () => {
+    try {
+      const res = await axiosInstance.get("/api/groups");
+      set({ groups: res.data });
+    } catch (error) {
+      toast.error("Failed to fetch groups");
+    }
+  },
 }));

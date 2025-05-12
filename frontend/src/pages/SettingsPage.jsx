@@ -81,7 +81,7 @@ const SettingsPage = () => {
   };
 
   const authUser = { _id: "user2", fullName: "You" };
-  const selectedUser = { _id: "user1", fullName: "Ariana Grande" };
+  const selectedChat = { _id: "user1", fullName: "Ariana Grande" };
 
   const getQuotedMessage = (replyToId) => PREVIEW_MESSAGES.find((msg) => msg.id === replyToId);
 

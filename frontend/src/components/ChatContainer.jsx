@@ -5,6 +5,7 @@ import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import MessageReactions from "./MessageReactions";
+import ProfileModal from "./ProfileModal";
 import { formatMessageTime } from "../lib/utils";
 import { Reply } from "lucide-react";
 
@@ -13,7 +14,7 @@ const ChatContainer = () => {
     messages,
     getMessages,
     isMessagesLoading,
-    selectedUser,
+    selectedChat,
     subscribeToMessages,
     unsubscribeFromMessages,
     setReplyingTo,
@@ -22,22 +23,31 @@ const ChatContainer = () => {
     users,
     replyingTo,
   } = useChatStore();
-  const { authUser } = useAuthStore();
+  const { authUser, joinRoom, leaveRoom } = useAuthStore();
   const messageEndRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const hasLoadedMessages = useRef(false);
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+
 
   useEffect(() => {
-    if (selectedUser?._id && !hasLoadedMessages.current) {
-      getMessages(selectedUser._id);
+    if (selectedChat?._id && !hasLoadedMessages.current) {
+      getMessages(selectedChat._id);
       hasLoadedMessages.current = true;
       subscribeToMessages();
     }
     return () => {
       unsubscribeFromMessages();
-      if (selectedUser?._id) hasLoadedMessages.current = false;
+      if (selectedChat?._id) hasLoadedMessages.current = false;
     };
-  }, [selectedUser?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  }, [selectedChat?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+
+  useEffect(() => {
+    if (selectedChat?.type === "group" && selectedChat.group?._id) {
+      joinRoom(selectedChat.group._id);
+      return () => leaveRoom(selectedChat.group._id);
+    }
+  }, [selectedChat?.type, selectedChat?.group?._id]);
 
   useEffect(() => {
     if (messageEndRef.current && messages && !initialScrollDone) {
@@ -80,11 +90,40 @@ const ChatContainer = () => {
 
   return (
     <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
-      <ChatHeader />
+      <ChatHeader onProfileClick={() => setProfileModalOpen(true)} />
+      <ProfileModal
+        type={selectedChat?.type}
+        user={selectedChat?.user}
+        group={selectedChat?.group}
+        open={isProfileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 w-full custom-scrollbar">
         {messages.map((message, idx) => {
           const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
-          const isOwnMessage = message.senderId === authUser._id;
+          const isOwnMessage =
+            typeof message.senderId === "object"
+              ? message.senderId._id === authUser._id
+              : message.senderId === authUser._id;
+
+          const getSenderProfilePic = (message) => {
+            if (isOwnMessage) return authUser.profilePic || "/avatar.png";
+            if (selectedChat?.type === "user") {
+              return selectedChat?.user?.profilePic || "/avatar.png";
+            }
+            if (selectedChat?.type === "group") {
+              // senderId may be an object or string
+              const senderId = typeof message.senderId === "object" ? message.senderId._id : message.senderId;
+              // Try to find the sender in group members (if you have them), or fallback to just the sender object
+              if (typeof message.senderId === "object" && message.senderId.profilePic) {
+                return message.senderId.profilePic;
+              }
+              // fallback
+              return "/avatar.png";
+            }
+            return "/avatar.png";
+          };
+
 
           // For reply/reaction coloring: secondary if own message, primary if from other user
           const actionColor = isOwnMessage ? "secondary" : "primary";
@@ -112,7 +151,11 @@ const ChatContainer = () => {
             <div key={message._id} className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-glassMorph`} style={{ animationDelay: `${idx * 0.05}s` }} ref={idx === messages.length - 1 ? messageEndRef : null}>
               <div className="chat-image avatar">
                 <div className={`size-10 rounded-full border-2 ${isOwnMessage ? "border-secondary/40" : "border-base-300"} hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-500 animate-subtleScale`}>
-                  <img src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedUser.profilePic || "/avatar.png"} alt="profile pic" className="rounded-full" />
+                  <img
+                    src={getSenderProfilePic(message)}
+                    alt="profile pic"
+                    className="rounded-full"
+                  />
                 </div>
               </div>
               <div className="chat-header mb-1">
@@ -120,13 +163,21 @@ const ChatContainer = () => {
                   {formatMessageTime(message.createdAt)}
                 </time>
               </div>
-              <div className={`chat-bubble flex flex-col relative group ${bubbleBg} ${bubbleBorder} ${bubbleShadow} backdrop-blur-2xl max-w-[80%] rounded-2xl hover:shadow-lg transition-all duration-500 animate-glassMorph font-medium text-base glassmorphism-header`}>
+              <div className={`chat-bubble flex flex-col relative group ${isOwnMessage
+                ? "bg-base-300 text-base-content"
+                : "bg-secondary text-secondary-content"
+                } backdrop-blur-2xl max-w-[80%] rounded-2xl shadow-md hover:shadow-lg transition-all duration-500 animate-glassMorph font-medium text-base`}>
                 {quotedMessage && (
-                  <div className={`mb-2 p-2 rounded-lg border-l-4 ${quotedBg} font-semibold shadow-inner animate-glassMorph border-l-4`}>
-                    <p className={`text-xs font-bold ${quotedText}`}>
-                      {quotedMessage.senderId === authUser._id ? "Replying to you" : selectedUser.fullName}
+                  <div className="mb-2 p-2 bg-base-300/15 backdrop-blur-lg rounded-lg border-l-4 border-quaternary/50 animate-glassMorph">
+                    <p className="text-xs text-quaternary-content/80">
+                      {quotedMessage.senderId === authUser._id
+                        ? "You"
+                        : selectedChat?.type === "user"
+                          ? selectedChat?.user?.fullName
+                          : selectedChat?.group?.name
+                      }
                     </p>
-                    <p className={`text-sm truncate max-w-[220px] ${quotedText}`}>{quotedMessage.text || (quotedMessage.image && "Image")}</p>
+                    <p className="text-sm truncate max-w-[200px] text-quaternary-content/80">{quotedMessage.text || (quotedMessage.image && "Image")}</p>
                   </div>
                 )}
                 {message.image && (
