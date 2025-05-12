@@ -1,3 +1,283 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme CSS variables for tertiary and quaternary colors, with RGB helpers for opacity utilities */
+:root, [data-theme="light"] {
+  --tertiary: #22c55e;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 34,197,94;
+  --quaternary: #a3a3a3;
+  --quaternary-content: #1f2937;
+  --quaternary-rgb: 163,163,163;
+}
+[data-theme="dark"] {
+  --tertiary: #f59e0b;
+  --tertiary-content: #e5e7eb;
+  --tertiary-rgb: 245,158,11;
+  --quaternary: #6b7280;
+  --quaternary-content: #1f2937;
+  --quaternary-rgb: 107,114,128;
+}
+[data-theme="platinum"] {
+  --tertiary: #d4d4d8;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 212,212,216;
+  --quaternary: #a1a1aa;
+  --quaternary-content: #1f2937;
+  --quaternary-rgb: 161,161,170;
+}
+[data-theme="tiffany"] {
+  --tertiary: #22d3ee;
+  --tertiary-content: #164e63;
+  --tertiary-rgb: 34,211,238;
+  --quaternary: #0d9488;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 13,148,136;
+}
+[data-theme="onyx"] {
+  --tertiary: #64748b;
+  --tertiary-content: #e5e7eb;
+  --tertiary-rgb: 100,116,139;
+  --quaternary: #9ca3af;
+  --quaternary-content: #1c2526;
+  --quaternary-rgb: 156,163,175;
+}
+[data-theme="pearl"] {
+  --tertiary: #d1fae5;
+  --tertiary-content: #374151;
+  --tertiary-rgb: 209,250,229;
+  --quaternary: #d1d5db;
+  --quaternary-content: #374151;
+  --quaternary-rgb: 209,213,219;
+}
+[data-theme="sapphire"] {
+  --tertiary: #93c5fd;
+  --tertiary-content: #1e293b;
+  --tertiary-rgb: 147,197,253;
+  --quaternary: #1e293b;
+  --quaternary-content: #e0f2fe;
+  --quaternary-rgb: 30,41,59;
+}
+[data-theme="emerald"] {
+  --tertiary: #6ee7b7;
+  --tertiary-content: #064e3b;
+  --tertiary-rgb: 110,231,183;
+  --quaternary: #064e3b;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 6,78,59;
+}
+[data-theme="ruby"] {
+  --tertiary: #fee2e2;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 254,226,226;
+  --quaternary: #450a0a;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 69,10,10;
+}
+[data-theme="amber"] {
+  --tertiary: #fb923c;
+  --tertiary-content: #78350f;
+  --tertiary-rgb: 251,146,60;
+  --quaternary: #d97706;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 217,119,6;
+}
+[data-theme="opal"] {
+  --tertiary: #bef264;
+  --tertiary-content: #365314;
+  --tertiary-rgb: 190,242,100;
+  --quaternary: #4d7c0f;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 77,124,15;
+}
+[data-theme="topaz"] {
+  --tertiary: #fdba74;
+  --tertiary-content: #7c2d12;
+  --tertiary-rgb: 253,186,116;
+  --quaternary: #9a3412;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 154,52,18;
+}
+[data-theme="obsidian"] {
+  --tertiary: #475569;
+  --tertiary-content: #e2e8f0;
+  --tertiary-rgb: 71,85,105;
+  --quaternary: #cbd5e1;
+  --quaternary-content: #0f172a;
+  --quaternary-rgb: 203,213,225;
+}
+[data-theme="graphite"] {
+  --tertiary: #d1d5db;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 209,213,219;
+  --quaternary: #9ca3af;
+  --quaternary-content: #1f2937;
+  --quaternary-rgb: 156,163,175;
+}
+[data-theme="champagne"] {
+  --tertiary: #fef3c7;
+  --tertiary-content: #713f12;
+  --tertiary-rgb: 254,243,199;
+  --quaternary: #a16207;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 161,98,7;
+}
+[data-theme="midnight"] {
+  --tertiary: #93c5fd;
+  --tertiary-content: #1e293b;
+  --tertiary-rgb: 147,197,253;
+  --quaternary: #1e293b;
+  --quaternary-content: #e0f2fe;
+  --quaternary-rgb: 30,41,59;
+}
+[data-theme="ivory"] {
+  --tertiary: #fefce8;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 254,252,232;
+  --quaternary: #d1d5db;
+  --quaternary-content: #1f2937;
+  --quaternary-rgb: 209,213,219;
+}
+[data-theme="rose"] {
+  --tertiary: #f9a8d4;
+  --tertiary-content: #9d174d;
+  --tertiary-rgb: 249,168,212;
+  --quaternary: #9d174d;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 157,23,77;
+}
+[data-theme="citrine"] {
+  --tertiary: #fef9c3;
+  --tertiary-content: #713f12;
+  --tertiary-rgb: 254,249,195;
+  --quaternary: #a16207;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 161,98,7;
+}
+[data-theme="jade"] {
+  --tertiary: #a7f3d0;
+  --tertiary-content: #064e3b;
+  --tertiary-rgb: 167,243,208;
+  --quaternary: #064e3b;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 6,78,59;
+}
+[data-theme="amethyst"] {
+  --tertiary: #d8b4fe;
+  --tertiary-content: #6b21a8;
+  --tertiary-rgb: 216,180,254;
+  --quaternary: #6b21a8;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 107,33,168;
+}
+[data-theme="cobalt"] {
+  --tertiary: #93c5fd;
+  --tertiary-content: #1e3a8a;
+  --tertiary-rgb: 147,197,253;
+  --quaternary: #1e3a8a;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 30,58,138;
+}
+[data-theme="bronze"] {
+  --tertiary: #f4b563;
+  --tertiary-content: #7c2d12;
+  --tertiary-rgb: 244,181,99;
+  --quaternary: #7c2d12;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 124,45,18;
+}
+[data-theme="silver"] {
+  --tertiary: #d1d5db;
+  --tertiary-content: #1f2937;
+  --tertiary-rgb: 209,213,219;
+  --quaternary: #6b7280;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 107,114,128;
+}
+[data-theme="gold"] {
+  --tertiary: #fef08a;
+  --tertiary-content: #713f12;
+  --tertiary-rgb: 254,240,138;
+  --quaternary: #a16207;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 161,98,7;
+}
+[data-theme="charcoal"] {
+  --tertiary: #9ca3af;
+  --tertiary-content: #e5e7eb;
+  --tertiary-rgb: 156,163,175;
+  --quaternary: #d1d5db;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 209,213,219;
+}
+[data-theme="sandstone"] {
+  --tertiary: #fed7aa;
+  --tertiary-content: #713f12;
+  --tertiary-rgb: 254,215,170;
+  --quaternary: #a16207;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 161,98,7;
+}
+[data-theme="arctic"] {
+  --tertiary: #22d3ee;
+  --tertiary-content: #164e63;
+  --tertiary-rgb: 34,211,238;
+  --quaternary: #0d9488;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 13,148,136;
+}
+[data-theme="velvet"] {
+  --tertiary: #d8b4fe;
+  --tertiary-content: #6b21a8;
+  --tertiary-rgb: 216,180,254;
+  --quaternary: #6b21a8;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 107,33,168;
+}
+[data-theme="storm"] {
+  --tertiary: #93c5fd;
+  --tertiary-content: #1e3a8a;
+  --tertiary-rgb: 147,197,253;
+  --quaternary: #1e3a8a;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 30,58,138;
+}
+[data-theme="blush"] {
+  --tertiary: #f9a8d4;
+  --tertiary-content: #9d174d;
+  --tertiary-rgb: 249,168,212;
+  --quaternary: #9d174d;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 157,23,77;
+}
+[data-theme="aurora"] {
+  --tertiary: #f472b6;
+  --tertiary-content: #0e7490;
+  --tertiary-rgb: 244,114,182;
+  --quaternary: #facc15;
+  --quaternary-content: #ffffff;
+  --quaternary-rgb: 250,204,21;
+}
+[data-theme="eclipse"] {
+  --tertiary: #6366f1;
+  --tertiary-content: #f1f5f9;
+  --tertiary-rgb: 99,102,241;
+  --quaternary: #f43f5e;
+  --quaternary-content: #312e81;
+  --quaternary-rgb: 244,63,94;
+}
+
+/* Utility classes for using opacity with CSS variables */
+.bg-tertiary-50 { background-color: rgba(var(--tertiary-rgb), 0.5); }
+.bg-tertiary-20 { background-color: rgba(var(--tertiary-rgb), 0.2); }
+.bg-quaternary-50 { background-color: rgba(var(--quaternary-rgb), 0.5); }
+.bg-quaternary-20 { background-color: rgba(var(--quaternary-rgb), 0.2); }
+.text-tertiary { color: var(--tertiary); }
+.text-quaternary { color: var(--quaternary); }
+.bg-tertiary { background-color: var(--tertiary); }
+.bg-quaternary { background-color: var(--quaternary); }
+.text-tertiary-content { color: var(--tertiary-content); }
+.text-quaternary-content { color: var(--quaternary-content); }
+.bg-tertiary-content { background-color: var(--tertiary-content); }
+.bg-quaternary-content { background-color: var(--quaternary-content); }

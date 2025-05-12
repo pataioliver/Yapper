@@ -5,7 +5,6 @@ import Friendship from "../models/friendship.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
-
 export const areUsersFriends = async (userId1, userId2) => {
   const friendship = await Friendship.findOne({
     $or: [
@@ -38,7 +37,7 @@ export const getMessages = async (req, res) => {
         { senderId: myId, receiverId: userToChatId },
         { senderId: userToChatId, receiverId: myId },
       ],
-    });
+    }).sort({ createdAt: 1 });
 
     res.status(200).json(messages);
   } catch (error) {
@@ -49,7 +48,7 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, image, replyToId } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
@@ -70,6 +69,7 @@ export const sendMessage = async (req, res) => {
       receiverId,
       text,
       image: imageUrl,
+      replyToId: replyToId || null,
     });
 
     await newMessage.save();
@@ -82,6 +82,45 @@ export const sendMessage = async (req, res) => {
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Add reaction to a message
+export const addReaction = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { emoji } = req.body;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // Remove previous reaction by this user (if any)
+    message.reactions = message.reactions.filter(
+      (r) => r.userId.toString() !== userId.toString()
+    );
+
+    // Add new reaction
+    message.reactions.push({ emoji, userId });
+
+    await message.save();
+
+    // Notify both sender and receiver if online
+    const receiverSocketId = getReceiverSocketId(message.receiverId.toString());
+    const senderSocketId = getReceiverSocketId(message.senderId.toString());
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageReaction", { messageId, emoji, userId });
+    }
+    if (senderSocketId && senderSocketId !== receiverSocketId) {
+      io.to(senderSocketId).emit("messageReaction", { messageId, emoji, userId });
+    }
+
+    res.status(200).json({ message: "Reaction added", reactions: message.reactions });
+  } catch (error) {
+    console.log("Error in addReaction controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

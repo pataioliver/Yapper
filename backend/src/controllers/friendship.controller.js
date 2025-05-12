@@ -6,14 +6,16 @@ export const sendFriendRequest = async (req, res) => {
         const requester = req.user._id;
         const { recipientId } = req.body;
 
-        // Prevent duplicate requests
+        // Prevent duplicate requests in either direction if pending or accepted
         const existing = await Friendship.findOne({
-            requester,
-            recipient: recipientId,
+            $or: [
+                { requester, recipient: recipientId, status: { $in: ["pending", "accepted"] } },
+                { requester: recipientId, recipient: requester, status: { $in: ["pending", "accepted"] } }
+            ]
         });
 
         if (existing) {
-            return res.status(400).json({ error: "Request already sent" });
+            return res.status(400).json({ error: "Friend request already exists or you are already friends" });
         }
 
         const friendship = new Friendship({ requester, recipient: recipientId });
@@ -23,7 +25,6 @@ export const sendFriendRequest = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
-
 
 export const acceptFriendRequest = async (req, res) => {
     try {

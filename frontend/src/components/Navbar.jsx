@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -10,90 +10,90 @@ const Navbar = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <header className="bg-base-100/85 backdrop-blur-2xl border-b border-quaternary/20 fixed w-full top-0 z-40 shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-500 animate-glassMorph">
-      <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 group transition-all duration-300 hover:opacity-90 animate-glassMorph">
-          <div className="size-9 rounded-xl bg-secondary/85 backdrop-blur-md flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.15)] hover:shadow-[0_0_15px_rgba(255,255,255,0.25)] transition-all duration-300 animate-subtleScale">
-            <MessageSquare className="w-5 h-5 text-secondary-content" strokeWidth={2.5} />
+    <header className="fixed top-0 left-0 w-full bg-base-100/85 backdrop-blur-2xl border-b border-base-content/20 z-50">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="size-8 rounded-xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <MessageSquare className="size-5 text-secondary-content" strokeWidth={2.5} />
           </div>
-          <h1 className="text-lg font-bold text-base-content relative">
-            Yapper
-            <span className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-secondary to-tertiary animate-underlineGrow group-hover:animate-underlineGrow" />
-          </h1>
+          <span className="text-xl font-bold text-base-content">Yapper</span>
         </Link>
+
         <nav className="hidden sm:flex items-center gap-2">
           <Link
             to="/settings"
-            className="btn btn-sm bg-secondary/50 border-2 border-secondary/50 text-secondary-content gap-2 hover:bg-secondary/75 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl"
+            className="group px-3 py-1.5 rounded-xl bg-secondary border-2 border-secondary-content shadow-md hover:shadow-lg hover:scale-105 hover:brightness-110 active:scale-95 transition-all duration-300"
           >
-            <Settings className="size-4 text-secondary-content" />
-            <span className="hidden sm:inline text-secondary-content">Settings</span>
+            <div className="flex items-center gap-2">
+              <Settings className="size-4 text-secondary-content" />
+              <span className="hidden sm:inline text-secondary-content font-medium">Settings</span>
+            </div>
           </Link>
           {authUser && (
             <>
               <Link
                 to="/profile"
-                className="btn btn-sm bg-secondary/50 border-2 border-secondary/50 text-secondary-content gap-2 hover:bg-secondary/75 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl"
+                className="group px-3 py-1.5 rounded-xl bg-tertiary border-2 border-tertiary-content shadow-md hover:shadow-lg hover:scale-105 hover:brightness-110 active:scale-95 transition-all duration-300"
               >
-                <User className="size-4 text-secondary-content" />
-                <span className="hidden sm:inline text-secondary-content">Profile</span>
+                <div className="flex items-center gap-2">
+                  <User className="size-4 text-tertiary-content" />
+                  <span className="hidden sm:inline text-tertiary-content font-medium">Profile</span>
+                </div>
               </Link>
               <button
                 onClick={logout}
-                className="btn btn-sm bg-secondary/75 border-2 border-secondary/100 text-secondary-content gap-2 hover:bg-secondary/100 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl"
+                className="group px-3 py-1.5 rounded-xl bg-quaternary border-2 border-quaternary-content shadow-md hover:shadow-lg hover:scale-105 hover:brightness-110 active:scale-95 transition-all duration-300"
               >
-                <LogOut className="size-4 text-secondary-content" />
-                <span className="hidden sm:inline text-secondary-content">Logout</span>
+                <div className="flex items-center gap-2">
+                  <LogOut className="size-4 text-quaternary-content" />
+                  <span className="hidden sm:inline text-quaternary-content font-medium">Logout</span>
+                </div>
               </button>
             </>
           )}
         </nav>
-        <div className="sm:hidden">
-          <button
-            onClick={toggleMenu}
-            className="btn btn-sm bg-tertiary/10 border-2 border-tertiary/20 text-tertiary-content hover:bg-tertiary/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl"
-            aria-label="Toggle menu"
-          >
-            <svg className="size-5 text-tertiary-content" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-              />
-            </svg>
-          </button>
-        </div>
+
+        <button
+          onClick={toggleMenu}
+          className="sm:hidden btn btn-square btn-ghost btn-sm"
+        >
+          <div className="space-y-1.5">
+            <div className={`h-0.5 w-6 bg-base-content transform transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`} />
+            <div className={`h-0.5 w-6 bg-base-content transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`} />
+            <div className={`h-0.5 w-6 bg-base-content transform transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+          </div>
+        </button>
+
         {isMenuOpen && (
-          <nav className="sm:hidden absolute top-16 left-0 w-full bg-base-100/85 backdrop-blur-2xl border-b border-quaternary/20 shadow-[0_0_20px_rgba(255,255,255,0.1)] animate-slideDown">
-            <div className="flex flex-col items-center gap-2 py-2 max-w-xs mx-auto">
+          <nav className="sm:hidden absolute top-16 left-0 w-full bg-base-100/85 backdrop-blur-2xl border-b border-base-content/20 shadow-lg animate-slideDown">
+            <div className="flex flex-col items-center gap-3 p-4 max-w-xs mx-auto">
               <Link
                 to="/settings"
                 onClick={toggleMenu}
-                className="btn btn-md bg-secondary/50 border-2 border-secondary/50 text-secondary-content w-full gap-2 hover:bg-secondary/75 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl tile"
+                className="group flex items-center justify-center w-full gap-3 px-4 py-2.5 rounded-xl bg-secondary border-2 border-secondary-content shadow-md hover:shadow-lg hover:scale-[1.02] hover:brightness-110 active:scale-98 transition-all duration-300"
               >
-                <Settings className="size-4 text-secondary-content" />
-                <span className="text-secondary-content font-semibold">Settings</span>
+                <Settings className="size-5 text-secondary-content" />
+                <span className="text-secondary-content font-medium">Settings</span>
               </Link>
               {authUser && (
                 <>
                   <Link
                     to="/profile"
                     onClick={toggleMenu}
-                    className="btn btn-md bg-secondary/50 border-2 border-secondary/50 text-secondary-content w-full gap-2 hover:bg-secondary/75 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl tile"
+                    className="group flex items-center justify-center w-full gap-3 px-4 py-2.5 rounded-xl bg-tertiary border-2 border-tertiary-content shadow-md hover:shadow-lg hover:scale-[1.02] hover:brightness-110 active:scale-98 transition-all duration-300"
                   >
-                    <User className="size-4 text-secondary-content" />
-                    <span className="text-secondary-content font-semibold">Profile</span>
+                    <User className="size-5 text-tertiary-content" />
+                    <span className="text-tertiary-content font-medium">Profile</span>
                   </Link>
                   <button
                     onClick={() => {
                       logout();
                       toggleMenu();
                     }}
-                    className="btn btn-md bg-secondary/75 border-2 border-secondary/100 text-secondary-content w-full gap-2 hover:bg-secondary/100 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 ease-out animate-subtleScale rounded-xl tile"
+                    className="group flex items-center justify-center w-full gap-3 px-4 py-2.5 rounded-xl bg-quaternary border-2 border-quaternary-content shadow-md hover:shadow-lg hover:scale-[1.02] hover:brightness-110 active:scale-98 transition-all duration-300"
                   >
-                    <LogOut className="size-4 text-secondary-content" />
-                    <span className="text-secondary-content font-semibold">Logout</span>
+                    <LogOut className="size-5 text-quaternary-content" />
+                    <span className="text-quaternary-content font-medium">Logout</span>
                   </button>
                 </>
               )}

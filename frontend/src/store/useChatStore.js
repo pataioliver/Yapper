@@ -16,30 +16,23 @@ export const useChatStore = create((set, get) => ({
   isSidebarOpen: window.innerWidth >= 1024,
   replyingTo: null,
 
-  // ...existing code...
   fetchFriendshipData: async () => {
     set({ isUsersLoading: true });
     try {
-      // Fetch friends
       const friendsRes = await axiosInstance.get("/api/friendship/friends");
       set({ friends: friendsRes.data });
 
-      // Fetch all friendships
       const allFriendshipsRes = await axiosInstance.get("/api/friendship/all");
       set({ allFriendships: allFriendshipsRes.data });
 
-      // Fetch pending requests
       const pendingRes = await axiosInstance.get("/api/friendship/pending");
       set({ pendingRequests: pendingRes.data });
 
-      // Fetch all users for recommendations
       const usersRes = await axiosInstance.get("/api/messages/users");
 
-      // FIX: Use the authenticated user's ID
       const authUser = useAuthStore.getState().authUser;
       const myUserId = authUser?._id;
 
-      // Filter recommendations (not friends, not pending, not self)
       const friendIds = friendsRes.data.map((f) =>
         f.requester._id === myUserId ? f.recipient._id : f.requester._id
       );
@@ -59,52 +52,47 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-
-  // Accept a friend request
   acceptFriendRequest: async (requestId) => {
     try {
       await axiosInstance.post("/api/friendship/accept", { requestId });
       toast.success("Friend request accepted!");
-      get().fetchFriendshipData(); // Refresh data
+      get().fetchFriendshipData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to accept request");
     }
   },
 
-  // Reject a friend request
   rejectFriendRequest: async (requestId) => {
     try {
       await axiosInstance.post("/api/friendship/reject", { requestId });
       toast.success("Friend request rejected!");
-      get().fetchFriendshipData(); // Refresh data
+      get().fetchFriendshipData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to reject request");
     }
   },
 
-  // Send a friend request
   sendFriendRequest: async (recipientId) => {
     try {
       await axiosInstance.post("/api/friendship/request", { recipientId });
       toast.success("Friend request sent!");
-      get().fetchFriendshipData(); // Refresh data
+      get().fetchFriendshipData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send request");
     }
   },
 
-  // Unfriend a user
   unfriend: async (friendId) => {
     try {
       await axiosInstance.post("/api/friendship/unfriend", { friendId });
       toast.success("Unfriended successfully!");
-      get().fetchFriendshipData(); // Refresh data
+      get().fetchFriendshipData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to unfriend");
     }
   },
 
-  getMessages: async (userId) => {
+   getMessages: async (userId) => {
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`api/messages/${userId}`);
@@ -113,7 +101,9 @@ export const useChatStore = create((set, get) => ({
         reactions: msg.reactions || [],
         replyToId: msg.replyToId || null,
       }));
-      set({ messages: messagesWithReactions });
+      // Fetch all users for reaction tooltips
+      const usersRes = await axiosInstance.get("/api/messages/users");
+      set({ messages: messagesWithReactions, users: usersRes.data });
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -122,15 +112,14 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async (messageData) => {
-    const { selectedUser, messages, replyingTo } = get();
+    const { selectedUser, messages } = get();
     try {
       const payload = {
         ...messageData,
-        replyToId: replyingTo?._id || null,
       };
       const res = await axiosInstance.post(`api/messages/send/${selectedUser._id}`, payload);
       set({
-        messages: [...messages, { ...res.data, reactions: [], replyToId: payload.replyToId }],
+        messages: [...messages, { ...res.data, reactions: res.data.reactions || [], replyToId: res.data.replyToId || null }],
         replyingTo: null,
       });
     } catch (error) {
@@ -145,36 +134,47 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      // Only add if the message is for the current chat
+      if (
+        newMessage.senderId === selectedUser._id ||
+        newMessage.receiverId === selectedUser._id
+      ) {
+        set({
+          messages: [...get().messages, { ...newMessage, reactions: newMessage.reactions || [], replyToId: newMessage.replyToId || null }],
+        });
+      }
+    });
 
-      set({
-        messages: [...get().messages, { ...newMessage, reactions: [], replyToId: newMessage.replyToId || null }],
-      });
+    socket.on("messageReaction", ({ messageId, emoji, userId }) => {
+      set((state) => ({
+        messages: state.messages.map((msg) =>
+          msg._id === messageId
+            ? {
+                ...msg,
+                reactions: [
+                  ...msg.reactions.filter((r) => r.userId !== userId),
+                  { emoji, userId },
+                ],
+              }
+            : msg
+        ),
+      }));
     });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+    socket.off("messageReaction");
   },
 
-  addReaction: (messageId, reaction) => {
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg._id === messageId
-          ? {
-            ...msg,
-            reactions: [
-              ...msg.reactions.filter(
-                (r) => !(r.label === reaction.label && r.userId === reaction.userId)
-              ),
-              reaction,
-            ],
-          }
-          : msg
-      ),
-    }));
+  addReaction: async (messageId, reaction) => {
+    try {
+      await axiosInstance.post(`/api/messages/${messageId}/reactions`, { emoji: reaction.emoji });
+      // The socket event will update the UI in real time
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to add reaction");
+    }
   },
 
   setReplyingTo: (message) => set({ replyingTo: message }),

@@ -9,15 +9,15 @@ const NoChatSelected = () => {
   }
 
   return (
-    <div className="w-full flex flex-1 flex-col items-center justify-center p-8 sm:p-16 bg-base-100/10 backdrop-blur-2xl rounded-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph">
+    <div className="w-full flex flex-1 flex-col items-center justify-center p-8 sm:p-16 bg-base-100/40 backdrop-blur-2xl rounded-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph glassmorphism-header">
       <div className="max-w-md text-center space-y-6 relative">
         <div className="relative z-10">
-          <div className="absolute inset-0 bg-gradient-radial from-secondary/15 to-transparent rounded-full blur-2xl animate-pulseGlow opacity-50" />
+          <div className="absolute inset-0 bg-gradient-radial from-tertiary/20 to-quaternary/10 rounded-full blur-2xl animate-pulseGlow opacity-50" />
           <div className="relative w-16 h-16 mx-auto rounded-2xl bg-secondary/85 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-500 animate-scaleIn" style={{ animationDelay: "0.05s" }}>
             <MessageSquare className="w-8 h-8 text-secondary-content" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-base-content hover:text-base-content/90 transition-all duration-500 animate-glassMorph" style={{ animationDelay: "0.1s" }}>
+        <h2 className="text-2xl font-bold text-base-content hover:text-tertiary transition-all duration-500 animate-glassMorph" style={{ animationDelay: "0.1s" }}>
           Welcome to Yapper!
         </h2>
         <p className="text-quaternary-content/80 animate-glassMorph" style={{ animationDelay: "0.15s" }}>
