@@ -2,6 +2,8 @@ import express from 'express';
 import { protectRoute } from '../middleware/auth.middleware.js';
 import { subscribe, sendNotification } from '../controllers/push.controller.js';
 
+const router = express.Router();
+
 router.get("/vapid-key", (req, res) => {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   console.log("VAPID_PUBLIC_KEY:", publicKey); // Debug
@@ -11,7 +13,6 @@ router.get("/vapid-key", (req, res) => {
   res.json({ publicKey });
 });
 
-const router = express.Router();
 
 router.post('/subscribe', protectRoute, subscribe);
 router.post('/send-notification', protectRoute, sendNotification);
