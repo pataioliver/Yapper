@@ -16,22 +16,34 @@ import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import { THEME_COLORS } from "./constants/themes.js";
 
+/**
+ * Base URL determination with fallback
+ * Used for PWA manifest and resource references
+ */
 const baseUrl = `${import.meta.env.VITE_FRONTEND_URL}/` || "/";
 
+/**
+ * App Component - Main application container
+ * Handles routing, authentication checks, and theme application
+ */
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme, fontClass } = useThemeStore();
 
+  // Check authentication status on app load
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
+  // Apply theme and generate dynamic PWA manifest
   useEffect(() => {
+    // Apply theme and font to HTML element
     const html = document.documentElement;
     html.setAttribute("data-theme", theme);
     html.classList.remove(...html.classList);
     html.classList.add(fontClass);
 
+    // Generate dynamic PWA manifest based on current theme colors
     const colors = THEME_COLORS[theme] || THEME_COLORS.iosLight;
     const manifest = {
       name: "Yapper",
@@ -50,6 +62,7 @@ const App = () => {
       scope: baseUrl,
     };
 
+    // Create and apply dynamic manifest
     const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
     const manifestURL = URL.createObjectURL(blob);
     const manifestLink = document.querySelector('link[rel="manifest"]') || document.createElement("link");
@@ -57,16 +70,27 @@ const App = () => {
     manifestLink.href = manifestURL;
     document.head.appendChild(manifestLink);
 
+    // Apply theme color meta tag
     const themeColorMeta = document.querySelector('meta[name="theme-color"]') || document.createElement("meta");
     themeColorMeta.setAttribute("name", "theme-color");
     themeColorMeta.setAttribute("content", colors.theme_color);
     document.head.appendChild(themeColorMeta);
 
+    // Clean up created object URLs
     return () => {
       URL.revokeObjectURL(manifestURL);
     };
   }, [theme, fontClass]);
 
+  // Get theme colors for gradient
+  const colors = THEME_COLORS[theme] || THEME_COLORS.iosLight;
+  const gradPrimary = colors.primary || "#1e293b";
+  const gradSecondary = colors.secondary || "#334155";
+  const gradTertiary = colors.tertiary || "#0f172a";
+  const gradQuaternary = colors.quaternary || "#18181b";
+  const gradAccent = colors.accent || "#64748b";
+
+  // Show loading screen while checking authentication
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen bg-base-100 animate-glassMorphPulse border border-base-content/20">
@@ -77,22 +101,43 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Background gradient - fixed and non-scrolling */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-base-200 via-secondary/20 to-primary/10 opacity-95" />
-      
-      {/* Content area - scrollable */}
+      {/* Modern, multi-directional glassy gradient background */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `
+            linear-gradient(120deg, ${gradPrimary} 0%, ${gradTertiary} 50%, ${gradSecondary} 100%),
+            radial-gradient(circle at 70% 30%, ${gradAccent}88 0%, transparent 60%),
+            radial-gradient(ellipse at 30% 70%, ${gradQuaternary}77 0%, transparent 70%),
+            linear-gradient(90deg, #0008 0%, #0000 40%, #0000 60%, #0008 100%)
+          `,
+          backgroundBlendMode: "multiply, lighten, overlay",
+          opacity: 0.98,
+          WebkitBackdropFilter: "blur(32px) saturate(120%)",
+          backdropFilter: "blur(32px) saturate(120%)",
+          transition: "background 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      />
+      {/* Main content area with glassmorphism effect */}
       <div className="relative min-h-screen w-full backdrop-blur-lg">
         <Navbar />
         <Routes>
+          {/* Protected routes */}
           <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          
+          {/* Public routes */}
           <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
           <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
           <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+          
+          {/* Mixed access routes */}
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
           <Route path="/forgot-password" element={<RequestResetPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-      </Routes>
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+        </Routes>
+
+        {/* Global toast notifications */}
         <Toaster
           position="top-center"
           containerStyle={{

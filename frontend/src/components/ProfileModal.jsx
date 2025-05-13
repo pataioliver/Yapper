@@ -9,7 +9,7 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [selectedFriends, setSelectedFriends] = useState([]);
     const { authUser } = useAuthStore();
-    const { createGroup, friends } = useChatStore();
+    const { createGroup, friends, removeGroup } = useChatStore();
 
     useEffect(() => {
         // If opening for creating a new group directly, set showCreateGroup to true
@@ -63,6 +63,13 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
         }
     };
 
+    const handleDeleteGroup = async () => {
+        if (!group?._id) return;
+        if (!window.confirm("Are you sure you want to delete this group? This cannot be undone.")) return;
+        await removeGroup(group._id);
+        onClose();
+    };
+
     // If we're creating a new group (not showing details of existing)
     const isNewGroup = type === "group" && !group;
 
@@ -87,16 +94,21 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                     {!showCreateGroup && !isNewGroup && (
                         <div className="flex items-center flex-col gap-4 mb-6">
                             <div className="avatar">
-                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-3xl font-semibold">
+                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-3xl font-semibold overflow-hidden">
                                     {type === "user" && (
-                                        user.profilePicture || user.profilePic ? (
+                                        (user.profilePicture || user.profilePic) ? (
                                             <img
                                                 src={user.profilePicture || user.profilePic}
                                                 alt={user.fullName}
                                                 className="w-full h-full object-cover"
+                                                onError={e => { e.target.onerror = null; e.target.src = "/avatar.png"; }}
                                             />
                                         ) : (
-                                            <img src="/avatar.png" alt={user.fullName} className="w-full h-full object-cover" />
+                                            <img
+                                                src="/avatar.png"
+                                                alt={user.fullName}
+                                                className="w-full h-full object-cover"
+                                            />
                                         )
                                     )}
                                     {type === "group" && (
@@ -105,9 +117,10 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                                                 src={group.avatar}
                                                 alt={group.name}
                                                 className="w-full h-full object-cover"
+                                                onError={e => { e.target.onerror = null; e.target.src = "/avatar.png"; }}
                                             />
                                         ) : (
-                                            group.name?.charAt(0)
+                                            <span>{group.name?.charAt(0) || <img src="/avatar.png" alt="Group" className="w-full h-full object-cover" />}</span>
                                         )
                                     )}
                                 </div>
@@ -145,21 +158,26 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                                 {group.members?.map(member => (
                                     <div key={member._id} className="flex items-center gap-2 p-2 rounded-lg">
                                         <div className="avatar">
-                                            <div className="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
-                                                {member.profilePicture ? (
+                                            <div className="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
+                                                {(member.profilePicture || member.profilePic) ? (
                                                     <img
-                                                        src={member.profilePicture}
+                                                        src={member.profilePicture || member.profilePic}
+                                                        alt={member.fullName}
+                                                        className="w-full h-full object-cover"
+                                                        onError={e => { e.target.onerror = null; e.target.src = "/avatar.png"; }}
+                                                    />
+                                                ) : (
+                                                    <img
+                                                        src="/avatar.png"
                                                         alt={member.fullName}
                                                         className="w-full h-full object-cover"
                                                     />
-                                                ) : (
-                                                    member.fullName?.charAt(0)
                                                 )}
                                             </div>
                                         </div>
                                         <span>{member.fullName}</span>
                                         {group.admin && member._id === group.admin._id && (
-                                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                                            <span className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
                                                 Admin
                                             </span>
                                         )}
@@ -268,6 +286,18 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                                 onClick={() => setShowCreateGroup(true)}
                             >
                                 <UserPlus size={18} /> Create Group with {user.fullName}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Action Buttons for group admin */}
+                    {type === "group" && group && group.admin && authUser._id === group.admin._id && (
+                        <div className="flex gap-2 justify-center mt-4">
+                            <button
+                                className="btn btn-error"
+                                onClick={handleDeleteGroup}
+                            >
+                                Delete Group
                             </button>
                         </div>
                     )}

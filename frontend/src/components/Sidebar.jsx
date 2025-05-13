@@ -224,7 +224,7 @@ const Sidebar = ({ openProfileModal }) => {
           className={`flex-1 py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2
             ${activeTab === "chats"
               ? "bg-secondary/20 text-secondary shadow-md"
-              : "text-secondary-content/60 hover:bg-secondary/10 hover:text-secondary"
+              : "text-secondary-content/60 hover:bg-secondary/15 bg-secondary/10 hover:text-secondary"
             } backdrop-blur-md animate-glassyPop`}
           onClick={() => setActiveTab("chats")}
           style={{
@@ -242,7 +242,7 @@ const Sidebar = ({ openProfileModal }) => {
           className={`flex-1 py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2
             ${activeTab === "groups"
               ? "bg-secondary/20 text-secondary shadow-md"
-              : "text-secondary-content/60 hover:bg-secondary/10 hover:text-secondary"
+              : "text-secondary-content/60 hover:bg-secondary/15 bg-secondary/10 hover:text-secondary"
             } backdrop-blur-md animate-glassyPop`}
           onClick={() => setActiveTab("groups")}
           style={{
@@ -551,7 +551,7 @@ const Sidebar = ({ openProfileModal }) => {
 
       {/* User profile footer */}
       {authUser && (
-        <div className="p-5 border-t border-quaternary/10 bg-base-200/40 backdrop-blur-md">
+        <div className="p-5 border-t border-quaternary/10 bg-base-200/100 backdrop-blur-md">
           <div className="flex items-center">
             <div className="avatar">
               <div className="w-10 h-10 rounded-full border-2 border-quaternary/20 overflow-hidden bg-base-300">

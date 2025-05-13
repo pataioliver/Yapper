@@ -69,16 +69,12 @@ const MessageReactions = ({
     }
   };
 
+  // Use forceColor for button and bubble color
   const buttonColor = forceColor || (isOwnMessage ? "secondary" : "primary");
-  
-  // Adapt colors based on message ownership
-  const bubbleColorBg = isOwnMessage 
-    ? "bg-secondary/30 border-secondary/40" 
-    : "bg-base-200/60 border-base-300/50";
-  
-  const buttonTextColor = isOwnMessage 
-    ? "text-secondary-content" 
-    : "text-base-content";
+  const bubbleColorBg =
+    buttonColor === "secondary"
+      ? "bg-secondary text-secondary-content border-2 border-secondary"
+      : "bg-primary text-primary-content border-2 border-primary";
 
   // Reactions aligned based on message position
   const align = isOwnMessage ? "justify-end" : "justify-start";
@@ -91,12 +87,12 @@ const MessageReactions = ({
           <button
             ref={buttonRef}
             onClick={() => setShowPicker(prev => !prev)}
-            className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md border
-              ${bubbleColorBg} ${buttonTextColor} hover:brightness-110 
+            className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md
+              ${bubbleColorBg} hover:brightness-110 
               flex items-center transition-all ${buttonClassName}`}
             style={{
-              boxShadow: isOwnMessage 
-                ? "0 2px 8px rgba(80,180,255,0.15)" 
+              boxShadow: buttonColor === "secondary"
+                ? "0 2px 8px rgba(80,180,255,0.15)"
                 : "0 2px 8px rgba(0,0,0,0.06)"
             }}
             tabIndex={0}
@@ -146,12 +142,12 @@ const MessageReactions = ({
           <div
             key={emoji}
             className={`px-2.5 py-1 rounded-full text-xs flex items-center gap-1 font-semibold 
-              backdrop-blur-md ${bubbleColorBg} ${buttonTextColor} border
+              backdrop-blur-md ${bubbleColorBg} border
               ${userReactions[emoji] ? `ring-2 ring-${buttonColor}/60` : ''}
               hover:brightness-110 transition-all cursor-pointer animate-glassyPulse`}
             style={{
-              boxShadow: isOwnMessage 
-                ? "0 2px 8px rgba(80,180,255,0.15)" 
+              boxShadow: buttonColor === "secondary"
+                ? "0 2px 8px rgba(80,180,255,0.15)"
                 : "0 2px 8px rgba(0,0,0,0.06)",
               fontWeight: userReactions[emoji] ? 700 : 500,
             }}
@@ -165,12 +161,12 @@ const MessageReactions = ({
         <button
           ref={buttonRef}
           onClick={() => setShowPicker(prev => !prev)}
-          className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md border
-            ${bubbleColorBg} ${buttonTextColor} hover:brightness-110 
+          className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md
+            ${bubbleColorBg} hover:brightness-110 
             flex items-center transition-all ${buttonClassName}`}
           style={{
-            boxShadow: isOwnMessage 
-              ? "0 2px 8px rgba(80,180,255,0.15)" 
+            boxShadow: buttonColor === "secondary"
+              ? "0 2px 8px rgba(80,180,255,0.15)"
               : "0 2px 8px rgba(0,0,0,0.06)"
           }}
           tabIndex={0}

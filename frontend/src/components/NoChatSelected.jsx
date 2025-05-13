@@ -29,7 +29,7 @@ const NoChatSelected = () => {
             <MessageSquare className="w-8 h-8 text-secondary-content" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-base-content hover:text-tertiary transition-all duration-500 animate-glassMorph" style={{ animationDelay: "0.1s" }}>
+        <h2 className="text-2xl font-bold text-base-content hover:text-tertiary transition-all duration-500" style={{ animationDelay: "0.1s" }}>
           Welcome to Yapper!
         </h2>
         <p className="text-quaternary-content/80 animate-glassMorph" style={{ animationDelay: "0.15s" }}>

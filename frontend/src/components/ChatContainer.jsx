@@ -7,6 +7,15 @@ import MessageSkeleton from "./skeletons/MessageSkeleton";
 import MessageReactions from "./MessageReactions";
 import { Reply } from "lucide-react";
 
+/**
+ * ChatContainer Component
+ * 
+ * Main component for displaying and interacting with direct message conversations
+ * Handles message display, scrolling, reactions, and replies
+ * 
+ * @param {Object} props - Component props
+ * @param {Function} props.openProfileModal - Function to open the profile modal
+ */
 const ChatContainer = ({ openProfileModal }) => {
   const {
     messages,
@@ -21,12 +30,14 @@ const ChatContainer = ({ openProfileModal }) => {
     users,
     replyingTo,
   } = useChatStore();
+  
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const hasLoadedMessages = useRef(false);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
+  // Load messages when selected user changes and set up real-time subscription
   useEffect(() => {
     if (selectedUser?._id) {
       getMessages(selectedUser._id);
@@ -34,17 +45,22 @@ const ChatContainer = ({ openProfileModal }) => {
       subscribeToMessages();
       setInitialScrollDone(false);
     }
+    
+    // Clean up subscription when unmounting or changing users
     return () => {
       unsubscribeFromMessages();
       hasLoadedMessages.current = false;
     };
   }, [selectedUser?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
+  // Handle scrolling behavior when messages change
   useEffect(() => {
     if (messageEndRef.current && messages.length && !initialScrollDone) {
+      // Initial load - scroll to bottom
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
       setInitialScrollDone(true);
     } else if (messageEndRef.current && messages.length && initialScrollDone) {
+      // Check if user is already scrolled near bottom before auto-scrolling
       const isAtBottom =
         messageEndRef.current.getBoundingClientRect().bottom <= window.innerHeight + 100;
       if (isAtBottom) {
@@ -53,20 +69,14 @@ const ChatContainer = ({ openProfileModal }) => {
     }
   }, [messages, initialScrollDone]);
 
-  // Scroll to bottom when messages change or when typing
+  // Always scroll to bottom when new messages arrive
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Also scroll when typing a new message
-  useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []); // Add the state variable for your input text here, e.g. messageInputText
-
+  // Handler functions
   const handleReaction = (messageId, reaction) => addReaction(messageId, reaction);
   const handleReply = (message) => setReplyingTo(message);
   const getQuotedMessage = (replyToId) => messages.find((msg) => msg._id === replyToId);
@@ -85,6 +95,7 @@ const ChatContainer = ({ openProfileModal }) => {
     return "primary";
   };
 
+  // Show loading skeleton while fetching messages
   if (isMessagesLoading) {
     return (
       <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
@@ -98,6 +109,8 @@ const ChatContainer = ({ openProfileModal }) => {
   return (
     <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
       <ChatHeader openProfileModal={openProfileModal} />
+      
+      {/* Messages container */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 w-full custom-scrollbar">
         {messages.length === 0 ? (
           <div className="text-center py-8 text-quaternary-content/60">
@@ -108,6 +121,8 @@ const ChatContainer = ({ openProfileModal }) => {
             const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
             const isOwnMessage = message.senderId === authUser._id;
             const actionColor = isOwnMessage ? "secondary" : "primary";
+            
+            // Style configurations based on message ownership
             const bubbleBg = isOwnMessage
               ? "bg-secondary text-secondary-content"
               : "bg-primary text-primary-content";
@@ -118,7 +133,7 @@ const ChatContainer = ({ openProfileModal }) => {
               ? "shadow-[0_2px_16px_rgba(80,180,255,0.15)]"
               : "shadow-[0_2px_16px_rgba(180,80,255,0.08)]";
 
-            // Improved quoted reply coloring
+            // Quoted message styling
             let quotedBg = "bg-quaternary text-quaternary-content border-l-4 border-quaternary";
             let quotedText = "text-quaternary-content";
             if (quotedMessage) {
@@ -135,11 +150,12 @@ const ChatContainer = ({ openProfileModal }) => {
               <div
                 id={`msg-${message._id}`}
                 key={message._id}
-                className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group animate-fadeIn`}
+                className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group animate-glassyFadeIn`}
                 style={{ animationDelay: "0.01s", animationFillMode: 'both' }}
                 onMouseEnter={() => setHoveredMsgId(message._id)}
                 onMouseLeave={() => setHoveredMsgId(null)}
               >
+                {/* User avatar */}
                 <div className="chat-image avatar">
                   <div className="w-10 h-10 rounded-full border border-base-300/50 overflow-hidden">
                     <img
@@ -153,6 +169,8 @@ const ChatContainer = ({ openProfileModal }) => {
                     />
                   </div>
                 </div>
+                
+                {/* Message header with name and time */}
                 <div className="chat-header mb-1 opacity-75 text-sm">
                   {isOwnMessage ? "You" : selectedUser.fullName}
                   <time className="text-xs opacity-75 ml-1">
@@ -162,11 +180,13 @@ const ChatContainer = ({ openProfileModal }) => {
                     })}
                   </time>
                 </div>
+                
+                {/* Message bubble */}
                 <div
                   className={`chat-bubble rounded-2xl p-3 will-change-transform animation-gpu will-change-opacity animate-glassyPop overflow-hidden ${bubbleBg} ${bubbleBorder} ${bubbleShadow}`}
                   style={{ animationDelay: "0.01s", animationFillMode: 'both' }}
                 >
-                  {/* Quoted message */}
+                  {/* Quoted message if replying to another message */}
                   {quotedMessage && (
                     <div
                       className={`mb-3 p-2 rounded-lg text-sm font-medium ${quotedBg} hover:brightness-110 transition-all cursor-pointer`}
@@ -203,7 +223,7 @@ const ChatContainer = ({ openProfileModal }) => {
                     </div>
                   )}
 
-                  {/* Reactions display at the bottom of the bubble - always visible */}
+                  {/* Reactions display */}
                   {message.reactions && message.reactions.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2 justify-start">
                       {Object.entries(
@@ -240,27 +260,30 @@ const ChatContainer = ({ openProfileModal }) => {
                   )}
                 </div>
 
-                {/* Chat footer for actions */}
+                {/* Chat footer with action buttons */}
                 <div className="chat-footer opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 mt-1">
+                  {/* Reactions button */}
                   <MessageReactions
                     messageId={message._id}
                     reactions={message.reactions}
                     onReact={handleReaction}
                     isOwnMessage={isOwnMessage}
-                    forceColor={isOwnMessage ? "secondary" : "primary"}
+                    forceColor={actionColor}
                     show={hoveredMsgId === message._id}
                     displayMode="reactionButton"
                   />
+                  
+                  {/* Reply button */}
                   <button
                     onClick={() => handleReply(message)}
                     className={`text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5
-                      ${isOwnMessage
+                      ${actionColor === "secondary"
                         ? "bg-secondary text-secondary-content border-2 border-secondary"
                         : "bg-primary text-primary-content border-2 border-primary"
                       } 
                       backdrop-blur-md hover:brightness-110 transition-all animate-glassyPop`}
                     style={{
-                      boxShadow: isOwnMessage
+                      boxShadow: actionColor === "secondary"
                         ? "0 2px 8px rgba(80,180,255,0.15)"
                         : "0 2px 8px rgba(0,0,0,0.06)",
                       animationFillMode: 'both'
@@ -274,8 +297,11 @@ const ChatContainer = ({ openProfileModal }) => {
             );
           })
         )}
+        {/* Reference element for scrolling to bottom */}
         <div ref={messageEndRef} />
       </div>
+      
+      {/* Message input component */}
       <MessageInput replyColor={getReplyColor()} />
     </div>
   );

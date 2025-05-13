@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme CSS variables for tertiary and quaternary colors, with RGB helpers for opacity utilities */
+/* Theme CSS variables for all themes */
 :root,
 [data-theme="light"] {
   --tertiary: #22c55e;
@@ -104,273 +104,352 @@
 }
 
 [data-theme="topaz"] {
-  --tertiary: #fdba74;
-  --tertiary-content: #7c2d12;
-  --tertiary-rgb: 253, 186, 116;
-  --quaternary: #9a3412;
+  --tertiary: #fde68a;
+  --tertiary-content: #92400e;
+  --tertiary-rgb: 253, 230, 138;
+  --quaternary: #92400e;
   --quaternary-content: #ffffff;
-  --quaternary-rgb: 154, 52, 18;
+  --quaternary-rgb: 146, 64, 14;
 }
 
 [data-theme="obsidian"] {
-  --tertiary: #475569;
-  --tertiary-content: #e2e8f0;
-  --tertiary-rgb: 71, 85, 105;
-  --quaternary: #cbd5e1;
-  --quaternary-content: #0f172a;
-  --quaternary-rgb: 203, 213, 225;
+  --tertiary: #52525b;
+  --tertiary-content: #f4f4f5;
+  --tertiary-rgb: 82, 82, 91;
+  --quaternary: #27272a;
+  --quaternary-content: #f4f4f5;
+  --quaternary-rgb: 39, 39, 42;
 }
 
 [data-theme="graphite"] {
-  --tertiary: #d1d5db;
-  --tertiary-content: #1f2937;
-  --tertiary-rgb: 209, 213, 219;
-  --quaternary: #9ca3af;
-  --quaternary-content: #1f2937;
-  --quaternary-rgb: 156, 163, 175;
+  --tertiary: #4b5563;
+  --tertiary-content: #f9fafb;
+  --tertiary-rgb: 75, 85, 99;
+  --quaternary: #1f2937;
+  --quaternary-content: #f9fafb;
+  --quaternary-rgb: 31, 41, 55;
 }
 
 [data-theme="champagne"] {
-  --tertiary: #fef3c7;
-  --tertiary-content: #713f12;
-  --tertiary-rgb: 254, 243, 199;
-  --quaternary: #a16207;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 161, 98, 7;
+  --tertiary: #fed7aa;
+  --tertiary-content: #7c2d12;
+  --tertiary-rgb: 254, 215, 170;
+  --quaternary: #fdba74;
+  --quaternary-content: #7c2d12;
+  --quaternary-rgb: 253, 186, 116;
 }
 
 [data-theme="midnight"] {
-  --tertiary: #93c5fd;
-  --tertiary-content: #1e293b;
-  --tertiary-rgb: 147, 197, 253;
-  --quaternary: #1e293b;
-  --quaternary-content: #e0f2fe;
-  --quaternary-rgb: 30, 41, 59;
+  --tertiary: #312e81;
+  --tertiary-content: #e0e7ff;
+  --tertiary-rgb: 49, 46, 129;
+  --quaternary: #1e1b4b;
+  --quaternary-content: #e0e7ff;
+  --quaternary-rgb: 30, 27, 75;
 }
 
 [data-theme="ivory"] {
-  --tertiary: #fefce8;
+  --tertiary: #faf5ff;
+  --tertiary-content: #581c87;
+  --tertiary-rgb: 250, 245, 255;
+  --quaternary: #f5f3ff;
+  --quaternary-content: #581c87;
+  --quaternary-rgb: 245, 243, 255;
+}
+
+[data-theme="rose"] {
+  --tertiary: #fda4af;
+  --tertiary-content: #881337;
+  --tertiary-rgb: 253, 164, 175;
+  --quaternary: #fb7185;
+  --quaternary-content: #881337;
+  --quaternary-rgb: 251, 113, 133;
+}
+
+[data-theme="citrine"] {
+  --tertiary: #fde047;
+  --tertiary-content: #713f12;
+  --tertiary-rgb: 253, 224, 71;
+  --quaternary: #facc15;
+  --quaternary-content: #713f12;
+  --quaternary-rgb: 250, 204, 21;
+}
+
+[data-theme="jade"] {
+  --tertiary: #4ade80;
+  --tertiary-content: #14532d;
+  --tertiary-rgb: 74, 222, 128;
+  --quaternary: #34d399;
+  --quaternary-content: #14532d;
+  --quaternary-rgb: 52, 211, 153;
+}
+
+[data-theme="amethyst"] {
+  --tertiary: #c084fc;
+  --tertiary-content: #581c87;
+  --tertiary-rgb: 192, 132, 252;
+  --quaternary: #a855f7;
+  --quaternary-content: #581c87;
+  --quaternary-rgb: 168, 85, 247;
+}
+
+[data-theme="cobalt"] {
+  --tertiary: #38bdf8;
+  --tertiary-content: #0c4a6e;
+  --tertiary-rgb: 56, 189, 248;
+  --quaternary: #0ea5e9;
+  --quaternary-content: #0c4a6e;
+  --quaternary-rgb: 14, 165, 233;
+}
+
+[data-theme="bronze"] {
+  --tertiary: #d6d3d1;
+  --tertiary-content: #44403c;
+  --tertiary-rgb: 214, 211, 209;
+  --quaternary: #a8a29e;
+  --quaternary-content: #44403c;
+  --quaternary-rgb: 168, 162, 158;
+}
+
+[data-theme="silver"] {
+  --tertiary: #e5e7eb;
   --tertiary-content: #1f2937;
-  --tertiary-rgb: 254, 252, 232;
+  --tertiary-rgb: 229, 231, 235;
   --quaternary: #d1d5db;
   --quaternary-content: #1f2937;
   --quaternary-rgb: 209, 213, 219;
 }
 
-[data-theme="rose"] {
-  --tertiary: #f9a8d4;
-  --tertiary-content: #9d174d;
-  --tertiary-rgb: 249, 168, 212;
-  --quaternary: #9d174d;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 157, 23, 77;
-}
-
-[data-theme="citrine"] {
-  --tertiary: #fef9c3;
-  --tertiary-content: #713f12;
-  --tertiary-rgb: 254, 249, 195;
-  --quaternary: #a16207;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 161, 98, 7;
-}
-
-[data-theme="jade"] {
-  --tertiary: #a7f3d0;
-  --tertiary-content: #064e3b;
-  --tertiary-rgb: 167, 243, 208;
-  --quaternary: #064e3b;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 6, 78, 59;
-}
-
-[data-theme="amethyst"] {
-  --tertiary: #d8b4fe;
-  --tertiary-content: #6b21a8;
-  --tertiary-rgb: 216, 180, 254;
-  --quaternary: #6b21a8;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 107, 33, 168;
-}
-
-[data-theme="cobalt"] {
-  --tertiary: #93c5fd;
-  --tertiary-content: #1e3a8a;
-  --tertiary-rgb: 147, 197, 253;
-  --quaternary: #1e3a8a;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 30, 58, 138;
-}
-
-[data-theme="bronze"] {
-  --tertiary: #f4b563;
-  --tertiary-content: #7c2d12;
-  --tertiary-rgb: 244, 181, 99;
-  --quaternary: #7c2d12;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 124, 45, 18;
-}
-
-[data-theme="silver"] {
-  --tertiary: #d1d5db;
-  --tertiary-content: #1f2937;
-  --tertiary-rgb: 209, 213, 219;
-  --quaternary: #6b7280;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 107, 114, 128;
-}
-
 [data-theme="gold"] {
-  --tertiary: #fef08a;
-  --tertiary-content: #713f12;
-  --tertiary-rgb: 254, 240, 138;
-  --quaternary: #a16207;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 161, 98, 7;
+  --tertiary: #fcd34d;
+  --tertiary-content: #78350f;
+  --tertiary-rgb: 252, 211, 77;
+  --quaternary: #fbbf24;
+  --quaternary-content: #78350f;
+  --quaternary-rgb: 251, 191, 36;
 }
 
 [data-theme="charcoal"] {
-  --tertiary: #9ca3af;
-  --tertiary-content: #e5e7eb;
-  --tertiary-rgb: 156, 163, 175;
-  --quaternary: #d1d5db;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 209, 213, 219;
+  --tertiary: #4b5563;
+  --tertiary-content: #f9fafb;
+  --tertiary-rgb: 75, 85, 99;
+  --quaternary: #374151;
+  --quaternary-content: #f9fafb;
+  --quaternary-rgb: 55, 65, 81;
 }
 
 [data-theme="sandstone"] {
-  --tertiary: #fed7aa;
-  --tertiary-content: #713f12;
-  --tertiary-rgb: 254, 215, 170;
-  --quaternary: #a16207;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 161, 98, 7;
+  --tertiary: #f5d0a9;
+  --tertiary-content: #7c2d12;
+  --tertiary-rgb: 245, 208, 169;
+  --quaternary: #f7be8c;
+  --quaternary-content: #7c2d12;
+  --quaternary-rgb: 247, 190, 140;
 }
 
 [data-theme="arctic"] {
-  --tertiary: #22d3ee;
-  --tertiary-content: #164e63;
-  --tertiary-rgb: 34, 211, 238;
-  --quaternary: #0d9488;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 13, 148, 136;
+  --tertiary: #e0f2fe;
+  --tertiary-content: #0c4a6e;
+  --tertiary-rgb: 224, 242, 254;
+  --quaternary: #bae6fd;
+  --quaternary-content: #0c4a6e;
+  --quaternary-rgb: 186, 230, 253;
 }
 
 [data-theme="velvet"] {
-  --tertiary: #d8b4fe;
-  --tertiary-content: #6b21a8;
-  --tertiary-rgb: 216, 180, 254;
-  --quaternary: #6b21a8;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 107, 33, 168;
+  --tertiary: #f9a8d4;
+  --tertiary-content: #831843;
+  --tertiary-rgb: 249, 168, 212;
+  --quaternary: #f472b6;
+  --quaternary-content: #831843;
+  --quaternary-rgb: 244, 114, 182;
 }
 
 [data-theme="storm"] {
-  --tertiary: #93c5fd;
-  --tertiary-content: #1e3a8a;
-  --tertiary-rgb: 147, 197, 253;
-  --quaternary: #1e3a8a;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 30, 58, 138;
+  --tertiary: #6b7280;
+  --tertiary-content: #f3f4f6;
+  --tertiary-rgb: 107, 114, 128;
+  --quaternary: #4b5563;
+  --quaternary-content: #f3f4f6;
+  --quaternary-rgb: 75, 85, 99;
 }
 
 [data-theme="blush"] {
-  --tertiary: #f9a8d4;
+  --tertiary: #fbcfe8;
   --tertiary-content: #9d174d;
-  --tertiary-rgb: 249, 168, 212;
-  --quaternary: #9d174d;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 157, 23, 77;
+  --tertiary-rgb: 251, 207, 232;
+  --quaternary: #f9a8d4;
+  --quaternary-content: #9d174d;
+  --quaternary-rgb: 249, 168, 212;
 }
 
 [data-theme="aurora"] {
-  --tertiary: #f472b6;
-  --tertiary-content: #0e7490;
-  --tertiary-rgb: 244, 114, 182;
-  --quaternary: #facc15;
-  --quaternary-content: #ffffff;
-  --quaternary-rgb: 250, 204, 21;
+  --tertiary: #a7f3d0;
+  --tertiary-content: #064e3b;
+  --tertiary-rgb: 167, 243, 208;
+  --quaternary: #6ee7b7;
+  --quaternary-content: #064e3b;
+  --quaternary-rgb: 110, 231, 183;
 }
 
 [data-theme="eclipse"] {
-  --tertiary: #6366f1;
-  --tertiary-content: #f1f5f9;
-  --tertiary-rgb: 99, 102, 241;
-  --quaternary: #f43f5e;
-  --quaternary-content: #312e81;
-  --quaternary-rgb: 244, 63, 94;
+  --tertiary: #312e81;
+  --tertiary-content: #e0e7ff;
+  --tertiary-rgb: 49, 46, 129;
+  --quaternary: #1e1b4b;
+  --quaternary-content: #e0e7ff;
+  --quaternary-rgb: 30, 27, 75;
+}
+
+/* Glassmorphism header effect */
+.glassmorphism-header {
+  background: rgba(var(--tertiary-rgb), 0.15);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border-bottom: 1px solid rgba(var(--quaternary-rgb), 0.15);
+  transition: background-color 0.3s, backdrop-filter 0.3s;
 }
 
 /* Utility classes for using opacity with CSS variables */
-.bg-tertiary-50 {
-  background-color: rgba(var(--tertiary-rgb), 0.5);
-}
-
-.bg-tertiary-20 {
-  background-color: rgba(var(--tertiary-rgb), 0.2);
-}
-
-.bg-quaternary-50 {
-  background-color: rgba(var(--quaternary-rgb), 0.5);
-}
-
-.bg-quaternary-20 {
-  background-color: rgba(var(--quaternary-rgb), 0.2);
-}
-
-.text-tertiary {
-  color: var(--tertiary);
-}
-
-.text-quaternary {
-  color: var(--quaternary);
-}
-
-.bg-tertiary {
-  background-color: var(--tertiary);
-}
-
-.bg-quaternary {
-  background-color: var(--quaternary);
-}
-
-.text-tertiary-content {
-  color: var(--tertiary-content);
-}
-
-.text-quaternary-content {
-  color: var(--quaternary-content);
-}
-
-.bg-tertiary-content {
-  background-color: var(--tertiary-content);
-}
-
-.bg-quaternary-content {
-  background-color: var(--quaternary-content);
-}
+.bg-tertiary-50 { background-color: rgba(var(--tertiary-rgb), 0.5); }
+.bg-tertiary-20 { background-color: rgba(var(--tertiary-rgb), 0.2); }
+.bg-quaternary-50 { background-color: rgba(var(--quaternary-rgb), 0.5); }
+.bg-quaternary-20 { background-color: rgba(var(--quaternary-rgb), 0.2); }
+.text-tertiary { color: var(--tertiary); }
+.text-quaternary { color: var(--quaternary); }
+.bg-tertiary { background-color: var(--tertiary); }
+.bg-quaternary { background-color: var(--quaternary); }
+.text-tertiary-content { color: var(--tertiary-content); }
+.text-quaternary-content { color: var(--quaternary-content); }
+.bg-tertiary-content { background-color: var(--tertiary-content); }
+.bg-quaternary-content { background-color: var(--quaternary-content); }
 
 /* Highlight quoted message utility */
 .highlight-quoted {
   animation: highlightQuoted 1.5s ease-in-out;
+  background-color: transparent; /* Start transparent */
+  position: relative;
+}
+
+.highlight-quoted::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(var(--tertiary-rgb), 0.15);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+/* Animation GPU optimizations */
+.animation-gpu {
+  will-change: transform, opacity;
 }
 
 /* Custom scrollbar styles */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--quaternary); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--tertiary); }
+
+/* Add this helper function at the top */
+@layer utilities {
+  .bg-gradient-tertiary {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--tertiary-rgb), 0.1) 0%,
+      rgba(var(--tertiary-rgb), 0.3) 50%,
+      rgba(var(--tertiary-rgb), 0.1) 100%
+    );
+  }
+  
+  .bg-gradient-quaternary {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--quaternary-rgb), 0.1) 0%,
+      rgba(var(--quaternary-rgb), 0.3) 50%,
+      rgba(var(--quaternary-rgb), 0.1) 100%
+    );
+  }
+  
+  .glow-tertiary {
+    box-shadow: 0 0 10px rgba(var(--tertiary-rgb), 0.3);
+    /* Prevent background fill */
+    background-color: transparent !important;
+    position: relative;
+  }
+  
+  .glow-tertiary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: inset 0 0 15px rgba(var(--tertiary-rgb), 0.4);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .glow-quaternary {
+    box-shadow: 0 0 10px rgba(var(--quaternary-rgb), 0.3);
+    /* Prevent background fill */
+    background-color: transparent !important;
+    position: relative;
+  }
+  
+  .glow-quaternary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: inset 0 0 15px rgba(var(--quaternary-rgb), 0.4);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* Animation-specific glow classes */
+  .animate-glow-tertiary {
+    animation: glowPulseTertiary 2s infinite ease-in-out;
+    position: relative;
+  }
+  
+  .animate-glow-quaternary {
+    animation: glowPulseQuaternary 2s infinite ease-in-out;
+    position: relative;
+  }
+  
+  /* Debug helper */
+  .debug-bg {
+    outline: 2px dashed red !important;
+  }
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(var(--quaternary-rgb), 0.1);
-  border-radius: 10px;
+/* Add these keyframes for the animation */
+@keyframes glowPulseTertiary {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(var(--tertiary-rgb), 0.3),
+               0 0 10px rgba(var(--tertiary-rgb), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(var(--tertiary-rgb), 0.5),
+               0 0 20px rgba(var(--tertiary-rgb), 0.3);
+  }
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(var(--tertiary-rgb), 0.3);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--tertiary-rgb), 0.5);
+@keyframes glowPulseQuaternary {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(var(--quaternary-rgb), 0.3),
+               0 0 10px rgba(var(--quaternary-rgb), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(var(--quaternary-rgb), 0.5),
+               0 0 20px rgba(var(--quaternary-rgb), 0.3);
+  }
 }

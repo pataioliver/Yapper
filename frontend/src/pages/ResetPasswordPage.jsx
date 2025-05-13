@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Lock, Loader2, MessageSquare } from "lucide-react";
+import { Eye, EyeOff, Lock, Loader2, MessageSquare, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -11,8 +12,22 @@ const ResetPasswordPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Animation sequence control
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   const token = searchParams.get("token");
+
+  useEffect(() => {
+    if (!token) {
+      toast.error("Invalid or missing reset token");
+      navigate("/forgot-password");
+    }
+  }, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +36,8 @@ const ResetPasswordPage = () => {
       return toast.error("Both password fields are required");
     }
 
-    if (newPassword.length < 8) {
-      return toast.error("Password must be at least 8 characters");
+    if (newPassword.length < 6) {
+      return toast.error("Password must be at least 6 characters");
     }
 
     if (newPassword !== confirmPassword) {
@@ -45,9 +60,9 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl px-2">
-      <div className="w-full max-w-md mx-auto bg-base-100/85 backdrop-blur-md rounded-3xl p-4 sm:p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph">
-        <div className="text-center mb-8 sm:mb-10 animate-bounceInScale">
+    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl px-4 py-6 sm:py-0">
+      <div className="w-full max-w-md mx-auto bg-base-100/85 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph animation-gpu">
+        <div className={`text-center mb-8 sm:mb-10 ${isMounted ? 'animate-bounceInScale' : 'opacity-0'}`}>
           <div className="flex flex-col items-center gap-3">
             <div className="size-14 sm:size-16 rounded-2xl bg-secondary/85 backdrop-blur-md flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.15)] hover:shadow-[0_0_15px_rgba(255,255,255,0.25)] transition-all duration-300">
               <MessageSquare className="w-6 h-6 text-secondary-content" strokeWidth={2.5} />
@@ -62,7 +77,7 @@ const ResetPasswordPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.2s" }}>
+          <div className={`form-control ${isMounted ? 'animate-glassMorph' : 'opacity-0'}`} style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
               <input
                 type={showPassword ? "text" : "password"}
@@ -75,7 +90,7 @@ const ResetPasswordPage = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-secondary group-focus-within:scale-110 transition-all duration-300" />
               <button
                 type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-secondary group-focus-within:scale-110 transition-all duration-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-secondary transition-all duration-300"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
@@ -84,7 +99,7 @@ const ResetPasswordPage = () => {
               </button>
             </div>
           </div>
-          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.4s" }}>
+          <div className={`form-control ${isMounted ? 'animate-glassMorph' : 'opacity-0'}`} style={{ animationDelay: "0.4s" }}>
             <div className="relative group">
               <input
                 type={showPassword ? "text" : "password"}
@@ -97,7 +112,7 @@ const ResetPasswordPage = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-secondary group-focus-within:scale-110 transition-all duration-300" />
               <button
                 type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-secondary group-focus-within:scale-110 transition-all duration-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-secondary transition-all duration-300"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
@@ -108,7 +123,7 @@ const ResetPasswordPage = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-secondary text-secondary-content py-3 sm:py-4 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:dynamicScale active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 text-base"
+            className="w-full bg-secondary text-secondary-content py-3 sm:py-4 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 text-base"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
@@ -121,6 +136,16 @@ const ResetPasswordPage = () => {
             )}
           </button>
         </form>
+
+        <div className={`text-center mt-6 sm:mt-8 ${isMounted ? 'animate-glassMorph' : 'opacity-0'}`} style={{ animationDelay: "0.6s" }}>
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-1 text-base-content font-semibold hover:text-tertiary transition-colors duration-300 text-sm sm:text-base"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to login</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

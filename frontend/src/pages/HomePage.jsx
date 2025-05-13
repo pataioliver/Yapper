@@ -1,10 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useChatStore } from "../store/useChatStore";
-import Sidebar from "../components/Sidebar";
-import NoChatSelected from "../components/NoChatSelected";
-import ChatContainer from "../components/ChatContainer";
-import GroupChat from "../components/GroupChat";
-import ProfileModal from "../components/ProfileModal";
+import { Loader2 } from "lucide-react";
+
+// Lazy load components for better performance
+const Sidebar = lazy(() => import("../components/Sidebar"));
+const NoChatSelected = lazy(() => import("../components/NoChatSelected"));
+const ChatContainer = lazy(() => import("../components/ChatContainer"));
+const GroupChat = lazy(() => import("../components/GroupChat"));
+const ProfileModal = lazy(() => import("../components/ProfileModal"));
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-full w-full">
+    <Loader2 className="size-10 animate-spin text-tertiary" />
+  </div>
+);
 
 const HomePage = () => {
   const { selectedUser, selectedGroup, isSidebarOpen, setSidebarOpen } = useChatStore();
@@ -14,8 +23,15 @@ const HomePage = () => {
     user: null,
     group: null,
   });
+  const [isMounted, setIsMounted] = useState(false);
 
-  // On mobile, sidebar should be open by default
+  // Animation sequence control
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  // Mobile responsive layout logic
   useEffect(() => {
     const handleResize = () => {
       // On mobile, when no chat is selected, always show sidebar
@@ -33,7 +49,7 @@ const HomePage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [selectedUser, selectedGroup, setSidebarOpen]);
 
-  // Handle back button on mobile to show sidebar instead of navigating away
+  // Handle back button on mobile
   useEffect(() => {
     const handlePopState = (event) => {
       if (window.innerWidth < 768 && (selectedUser || selectedGroup)) {
@@ -66,47 +82,49 @@ const HomePage = () => {
     });
   };
 
-  // Animation for horizontal centering when sidebar is open/closed
-  // On desktop, shift chat right; on mobile, sidebar overlays
   return (
     <div className="min-h-screen backdrop-blur-xl animate-glassMorphPulse">
       <div className="flex items-center justify-center pt-20 px-4">
         <div
-          className={`bg-base-100/85 backdrop-blur-xl rounded-2xl shadow-[0_0_25px_rgba(255,255,255,0.3)] w-full max-w-6xl h-[calc(100vh-8rem)] transition-all duration-500 animate-glassMorphPulse border border-base-content/20 relative overflow-hidden`}
+          className={`bg-base-100/85 backdrop-blur-xl rounded-2xl shadow-[0_0_25px_rgba(255,255,255,0.3)] w-full max-w-6xl h-[calc(100vh-8rem)] transition-all duration-500 ${isMounted ? 'animate-glassMorphPulse' : 'opacity-90'} border border-base-content/20 relative overflow-hidden animation-gpu`}
         >
-          <Sidebar openProfileModal={openProfileModal} />
-          <div
-            className={`
-              flex h-full rounded-2xl overflow-hidden transition-all duration-500
-              ${isSidebarOpen ? "md:ml-80" : ""}
-            `}
-            style={{
-              transform: isSidebarOpen
-                ? "translateX(0)"
-                : "translateX(0)",
-              transition: "margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          >
-            {/* On mobile, hide chat when sidebar is open and no chat is selected */}
-            <div className={`flex-1 h-full ${isSidebarOpen && window.innerWidth < 768 && !selectedUser && !selectedGroup ? "hidden" : "flex"} transition-all duration-500`}>
-              {!selectedUser && !selectedGroup ? (
-                <NoChatSelected />
-              ) : selectedUser ? (
-                <ChatContainer openProfileModal={openProfileModal} />
-              ) : (
-                <GroupChat openProfileModal={openProfileModal} />
-              )}
+          <Suspense fallback={<LoadingFallback />}>
+            <Sidebar openProfileModal={openProfileModal} />
+            <div
+              className={`
+                flex h-full rounded-2xl overflow-hidden transition-all duration-500
+                ${isSidebarOpen ? "md:ml-80" : ""}
+              `}
+              style={{
+                transform: isSidebarOpen
+                  ? "translateX(0)"
+                  : "translateX(0)",
+                transition: "margin-left 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
+            >
+              {/* On mobile, hide chat when sidebar is open and no chat is selected */}
+              <div className={`flex-1 h-full ${isSidebarOpen && window.innerWidth < 768 && !selectedUser && !selectedGroup ? "hidden" : "flex"} transition-all duration-500`}>
+                {!selectedUser && !selectedGroup ? (
+                  <NoChatSelected />
+                ) : selectedUser ? (
+                  <ChatContainer openProfileModal={openProfileModal} />
+                ) : (
+                  <GroupChat openProfileModal={openProfileModal} />
+                )}
+              </div>
             </div>
-          </div>
+          </Suspense>
         </div>
       </div>
-      <ProfileModal
-        open={profileModal.open}
-        type={profileModal.type}
-        user={profileModal.user}
-        group={profileModal.group}
-        onClose={closeProfileModal}
-      />
+      <Suspense fallback={null}>
+        <ProfileModal
+          open={profileModal.open}
+          type={profileModal.type}
+          user={profileModal.user}
+          group={profileModal.group}
+          onClose={closeProfileModal}
+        />
+      </Suspense>
     </div>
   );
 };

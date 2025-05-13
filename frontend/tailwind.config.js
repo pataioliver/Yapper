@@ -1,11 +1,16 @@
 import daisyui from "daisyui";
 import { THEME_COLORS } from "./src/constants/themes.js";
 
-/** @type {import('tailwindcss').Config} */
+/** 
+ * @type {import('tailwindcss').Config} 
+ * Tailwind CSS configuration with custom animation system
+ * and theme integration with DaisyUI
+ */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      // Custom color configuration for tertiary and quaternary colors
       colors: {
         tertiary: {
           DEFAULT: "var(--tertiary)",
@@ -16,34 +21,41 @@ export default {
           content: "var(--quaternary-content)",
         },
       },
+      // Unified animation system with consistent naming and timing
       animation: {
+        // Basic UI animations
         fadeIn: "fadeIn 0.5s ease-in-out forwards",
         slideIn: "slideIn 0.5s ease-in-out forwards",
         slideDown: "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+        scaleIn: "scaleIn 0.3s ease-out forwards",
+        
+        // Glow and pulse effects
         pulseGlow: "pulseGlow 2s infinite",
         pulseGlowDark: "pulseGlowDark 1.5s ease-in-out infinite",
-        scaleIn: "scaleIn 0.3s ease-out forwards",
-        glassMorph: "glassMorph 3s ease infinite",
-        glassMorphPulse: "glassMorphPulse 4s ease infinite",
+        subtlePulse: "subtlePulse 2s ease-in-out infinite",
+        
+        // Interactive animations
         dynamicScale: "dynamicScale 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
         bounceInScale: "bounceInScale 0.5s ease-out forwards",
         gentleBounce: "gentleBounce 2s ease-in-out infinite",
         underlineGrow: "underlineGrow 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         subtleScale: "subtleScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         sleekThemeSelect: "sleekThemeSelect 1s cubic-bezier(0.22, 1, 0.36, 1)",
-        // iOS/modern glassy animations:
+        
+        // Modern glassy animations - consistent naming
         glassyPop: "glassyPop 0.3s ease-out forwards",
         glassySlideIn: "glassySlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards",
         glassyFadeIn: "glassyFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
         glassyBounce: "glassyBounce 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
         glassyPulse: "glassyPulse 2s ease-in-out infinite",
+        glassyReveal: "glassyReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        
+        // Highlight animations
         highlight: "highlight 2s ease-in-out",
         highlightGlow: "highlightGlow 1.5s ease-in-out infinite",
-        glassyReveal: "glassyReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
-        // Added new animations:
-        subtlePulse: "subtlePulse 2s ease-in-out infinite",
         'highlight-quoted': "highlightQuoted 1.5s ease-in-out",
       },
+      // Keyframes for all animations with consistent timing
       keyframes: {
         fadeIn: {
           "0%": { opacity: 0, transform: "translateY(10px)" },
@@ -69,16 +81,6 @@ export default {
           "0%": { opacity: 0, transform: "scale(0.95)" },
           "100%": { opacity: 1, transform: "scale(1)" },
         },
-        glassMorph: {
-          "0%": { backdropFilter: "blur(5px) saturate(100%)" },
-          "50%": { backdropFilter: "blur(7px) saturate(110%)" },
-          "100%": { backdropFilter: "blur(5px) saturate(100%)" },
-        },
-        glassMorphPulse: {
-          "0%": { backdropFilter: "blur(5px) saturate(100%)", boxShadow: "0 0 10px rgba(255, 255, 255, 0.1)" },
-          "50%": { backdropFilter: "blur(8px) saturate(120%)", boxShadow: "0 0 20px rgba(255, 255, 255, 0.2)" },
-          "100%": { backdropFilter: "blur(5px) saturate(100%)", boxShadow: "0 0 10px rgba(255, 255, 255, 0.1)" },
-        },
         dynamicScale: {
           "0%": { transform: "scale(0.95)", opacity: 0.8 },
           "50%": { transform: "scale(1.05)" },
@@ -94,7 +96,7 @@ export default {
           "50%": { transform: "scale(1.12) translateY(-4px)", boxShadow: "0 0 30px 10px rgba(255, 255, 255, 0.5)", opacity: 1 },
           "100%": { transform: "scale(1) translateY(0)", boxShadow: "0 0 0 0 rgba(255, 255, 255, 0.3)", opacity: 1 },
         },
-        // iOS/modern glassy keyframes:
+        // Modern glassy keyframes with consistent timing
         glassyPop: {
           "0%": { opacity: 0, transform: "scale(0.95) translateY(10px)" },
           "100%": { opacity: 1, transform: "scale(1) translateY(0)" },
@@ -128,7 +130,6 @@ export default {
           "0%": { opacity: 0, transform: "translateY(10px)" },
           "100%": { opacity: 1, transform: "translateY(0)" },
         },
-        // Added new keyframes:
         subtlePulse: {
           "0%, 100%": { opacity: 1 },
           "50%": { opacity: 0.6 },
@@ -140,6 +141,7 @@ export default {
           "100%": { backgroundColor: "rgba(var(--tertiary-rgb), 0)" },
         },
       },
+      // Font family definitions for consistent typography
       fontFamily: {
         arial: ["Arial", "Helvetica", "sans-serif"],
         verdana: ["Verdana", "Geneva", "sans-serif"],
@@ -164,7 +166,9 @@ export default {
       },
     },
   },
+  // Safelist ensures these classes are always generated even if not found in templates
   safelist: [
+    // Font families
     "font-arial",
     "font-verdana",
     "font-tahoma",
@@ -193,9 +197,11 @@ export default {
     "text-quaternary-content",
   ],
   plugins: [daisyui],
+  // DaisyUI theme configuration
   daisyui: {
     themes: Object.keys(THEME_COLORS).map(theme => {
       const themeColors = THEME_COLORS[theme];
+      // Detect light themes based on base-100 color
       const isLightTheme = themeColors["base-100"] && /^#(f|e|d)[0-9a-fA-F]{5}$/.test(themeColors["base-100"]);
       return {
         [theme]: {

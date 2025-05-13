@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Loader2, Mail, Key } from "lucide-react";
 import toast from "react-hot-toast";
@@ -11,6 +11,20 @@ const VerifyEmailPage = () => {
   const location = useLocation();
   const { token, fullName, email, password } = location.state || {};
   const { setAuthUser } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Animation sequence control
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      toast.error("Missing verification information");
+      navigate("/signup");
+    }
+  }, [token, navigate]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -39,9 +53,9 @@ const VerifyEmailPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl px-2">
-      <div className="w-full max-w-md mx-auto bg-base-100/85 backdrop-blur-md rounded-3xl p-4 sm:p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph">
-        <div className="text-center mb-8 sm:mb-10 animate-bounceInScale">
+    <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl px-4 py-6 sm:py-0">
+      <div className="w-full max-w-md mx-auto bg-base-100/85 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-lg border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-white/30 animate-glassMorph animation-gpu">
+        <div className={`text-center mb-8 sm:mb-10 ${isMounted ? 'animate-bounceInScale' : 'opacity-0'}`}>
           <div className="flex flex-col items-center gap-3">
             <div className="size-14 sm:size-16 rounded-2xl bg-secondary/85 backdrop-blur-md flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.15)] hover:shadow-[0_0_15px_rgba(255,255,255,0.25)] transition-all duration-300">
               <Mail className="w-6 h-6 text-secondary-content" strokeWidth={2.5} />
@@ -55,7 +69,7 @@ const VerifyEmailPage = () => {
           </div>
         </div>
         <form onSubmit={handleVerify} className="space-y-5 sm:space-y-6">
-          <div className="form-control animate-glassMorph" style={{ animationDelay: "0.2s" }}>
+          <div className={`form-control ${isMounted ? 'animate-glassMorph' : 'opacity-0'}`} style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
               <input
                 type="number"
@@ -65,12 +79,12 @@ const VerifyEmailPage = () => {
                 onChange={(e) => setVerificationCode(e.target.value)}
                 autoComplete="one-time-code"
               />
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-primary group-focus-within:scale-110 transition-all duration-300" />
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/70 group-hover:text-secondary group-focus-within:scale-110 transition-all duration-300" />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-secondary text-secondary-content py-3 sm:py-4 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:dynamicScale active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 text-base"
+            className="w-full bg-secondary text-secondary-content py-3 sm:py-4 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 text-base"
             disabled={isVerifying}
           >
             {isVerifying ? (

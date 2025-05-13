@@ -6,11 +6,14 @@ const THEMES = Object.keys(THEME_COLORS);
 
 // Helper to normalize font name for Tailwind class
 const normalizeFontName = (font) => {
+  if (!font) return "system";
+  
   return font
     .split(",")[0]
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/^['"]|['"]$/g, ""); // Remove quotes if present
 };
 
 // Helper to get a valid theme, fallback to first theme if not found
@@ -28,6 +31,22 @@ export const useThemeStore = create((set) => {
     normalizeFontName(THEME_COLORS[theme]?.font || "Inter, sans-serif")
   }`;
 
+  // Initialize theme on creation
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute("data-theme", theme);
+    
+    // Remove any existing font classes
+    const classList = document.documentElement.classList;
+    [...classList].forEach(cls => {
+      if (cls.startsWith('font-')) {
+        classList.remove(cls);
+      }
+    });
+    
+    // Add new font class
+    document.documentElement.classList.add(fontClass);
+  }
+
   return {
     theme,
     fontClass,
@@ -39,11 +58,21 @@ export const useThemeStore = create((set) => {
         }`;
         
         document.documentElement.setAttribute("data-theme", newTheme);
-        document.documentElement.classList.remove(...document.documentElement.classList);
+        
+        // Remove only font classes, not all classes
+        const classList = document.documentElement.classList;
+        [...classList].forEach(cls => {
+          if (cls.startsWith('font-')) {
+            classList.remove(cls);
+          }
+        });
+        
+        // Add new font class
         document.documentElement.classList.add(fontClass);
         
         set({ theme: newTheme, fontClass });
       }
     }
   };
+
 });

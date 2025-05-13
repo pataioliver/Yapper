@@ -18,7 +18,14 @@ const GroupChatHeader = ({ openProfileModal }) => {
   };
 
   return (
-    <div className="p-4 border-b border-quaternary/20 h-16 flex items-center bg-base-100/70 backdrop-blur-2xl rounded-tl-none rounded-tr-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 animate-glassySlideIn glassmorphism-header">
+    <div
+  className={
+    `p-4 border-b border-quaternary/20 h-16 flex items-center bg-base-100/70 backdrop-blur-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 animate-glassySlideIn glassmorphism-header ` +
+    (isSidebarOpen
+      ? "rounded-tr-2xl rounded-tl-none"
+      : "rounded-tr-2xl rounded-tl-2xl")
+  }
+>
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2">
           {!isSidebarOpen && (

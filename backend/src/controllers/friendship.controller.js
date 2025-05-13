@@ -103,7 +103,9 @@ export const getPendingRequests = async (req, res) => {
         const requests = await Friendship.find({
             recipient: userId,
             status: "pending",
-        }).populate("requester", "-password");
+        })
+        .populate("requester", "-password")
+        .populate("recipient", "-password");
         res.json(requests);
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });
@@ -113,15 +115,26 @@ export const getPendingRequests = async (req, res) => {
 export const unfriend = async (req, res) => {
   try {
     const { friendshipId } = req.body;
-    if (!friendshipId) return res.status(400).json({ message: "Missing friendshipId" });
-
+    const userId = req.user._id;
     const friendship = await Friendship.findById(friendshipId);
-    if (!friendship) return res.status(404).json({ message: "Friendship not found" });
 
-    await friendship.deleteOne();
+    if (!friendship) {
+      return res.status(404).json({ error: "Friendship not found" });
+    }
+
+    // Only requester or recipient can unfriend
+    if (
+      friendship.requester.toString() !== userId.toString() &&
+      friendship.recipient.toString() !== userId.toString()
+    ) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    await Friendship.deleteOne({ _id: friendshipId }); // <-- Delete the document
+
     res.json({ message: "Unfriended successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Failed to remove friend" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
