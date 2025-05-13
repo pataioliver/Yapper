@@ -1,13 +1,15 @@
-import { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
+import axios from "axios";
 import { THEMES, THEME_COLORS } from "../constants/themes";
 import { useThemeStore } from "../store/useThemeStore";
 import { Send, Check, Image, Bell, Reply, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { axiosInstance } from "../lib/axios.js";
 
 // Helper: check if a hex color is light
 const isLightColor = (hex) => {
-  if (!hex) return true;
+  if (!hex) return false;
   const c = hex.replace("#", "");
   const r = parseInt(c.substr(0, 2), 16);
   const g = parseInt(c.substr(2, 2), 16);
@@ -111,12 +113,30 @@ const PREVIEW_MESSAGES = [
 ];
 
 const normalizeFontName = (font) => {
+  if (!font) return "system";
   return font
     .split(",")[0]
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/^['"]|['"]$/g, "");
 };
+
+// Add this helper function to convert base64 string to Uint8Array for VAPID key
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 const SettingsPage = () => {
   const { theme, fontClass, setTheme } = useThemeStore();
@@ -152,29 +172,86 @@ const SettingsPage = () => {
   };
 
   const handleEnableNotifications = async () => {
-    if (!("Notification" in window)) {
-      toast.error("Notifications not supported in this browser");
-      return;
-    }
-    
     try {
+      // Check if notifications are supported
+      if (!("Notification" in window)) {
+        toast.error("This browser does not support notifications");
+        return;
+      }
+
+      // Request permission
       const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        toast.success("Notifications enabled!", {
-          icon: "🔔",
-          className: "bg-secondary/40 text-secondary-content backdrop-blur-md border border-secondary/80 animate-glassMorphPulse"
+      if (permission !== "granted") {
+        toast.error("Notification permission denied");
+        return;
+      }
+
+      // Register service worker if not already registered
+      let serviceWorkerReg;
+      if ('serviceWorker' in navigator) {
+        try {
+          // First check if service worker is already registered
+          serviceWorkerReg = await navigator.serviceWorker.getRegistration();
+          
+          if (!serviceWorkerReg) {
+            // Use your existing service worker file
+            serviceWorkerReg = await navigator.serviceWorker.register('/service-worker.js');
+            await navigator.serviceWorker.ready;
+          }
+        } catch (err) {
+          console.error("Service worker error:", err);
+          toast.error("Service worker registration failed");
+          return;
+        }
+      } else {
+        toast.error("Service workers not supported");
+        return;
+      }
+
+      // Get VAPID key from server with improved error handling
+      try {
+        console.log("Requesting VAPID key from server...");
+        const vapidResponse = await axiosInstance.get('/api/push/vapid-key');
+        console.log("VAPID response:", vapidResponse);
+        
+        if (!vapidResponse.data.success || !vapidResponse.data.publicKey) {
+          console.error("Invalid VAPID key response:", vapidResponse.data);
+          toast.error(vapidResponse.data.message || "Server configuration error");
+          return;
+        }
+        
+        const vapidKey = vapidResponse.data.publicKey;
+        
+        // Subscribe to push service
+        const convertedVapidKey = urlBase64ToUint8Array(vapidKey);
+        
+        // Check for existing subscription
+        let subscription = await serviceWorkerReg.pushManager.getSubscription();
+        
+        if (!subscription) {
+          subscription = await serviceWorkerReg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          });
+        }
+
+        // Send subscription to server
+        await axiosInstance.post('/api/push/subscribe', { 
+          subscription: subscription.toJSON() 
         });
         
-        // Register service worker if notifications are granted
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("/service-worker.js").catch(console.error);
-        }
-      } else if (permission === "denied") {
-        toast.error("Notifications blocked. Please enable them in your browser settings.");
+        toast.success("Notifications enabled successfully!");
+      } catch (err) {
+        console.error("Error fetching VAPID key:", err);
+        // More descriptive error message to help debugging
+        const errorMsg = err.response?.data?.message || 
+                         `Request failed: ${err.message} (${err.response?.status || 'unknown status'})`;
+        toast.error(errorMsg);
+        return;
       }
     } catch (error) {
-      toast.error("Error enabling notifications");
-      console.error("Notification error:", error);
+      console.error("Notification setup error:", error);
+      toast.error("Failed to enable notifications");
     }
   };
 
@@ -184,7 +261,7 @@ const SettingsPage = () => {
   const notificationsSecondary = THEME_COLORS[theme]?.secondary || "#3b82f6";
   const notificationsSecondaryContent = THEME_COLORS[theme]?.["secondary-content"] || "#fff";
   const notificationsIsLight = isLightColor(notificationsSecondary);
-  
+
   // Use preview theme colors for apply button
   const previewSecondary = THEME_COLORS[previewTheme]?.secondary || "#3b82f6";
   const previewSecondaryContent = THEME_COLORS[previewTheme]?.["secondary-content"] || "#fff";
@@ -205,14 +282,8 @@ const SettingsPage = () => {
         <div className="space-y-6 sm:space-y-8">
           {/* Updated header with proper centering */}
           <div className="relative mb-6">
-            <Link 
-              to="/" 
-              className="absolute left-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-base-content/80 hover:text-tertiary transition-all duration-300"
-            >
-              <ArrowLeft size={18} className="shrink-0" />
-              <span className="text-sm sm:text-base">Back</span>
-            </Link>
-            
+
+
             {/* Centered title, similar to ProfilePage */}
             <div className={`text-center ${isMounted ? 'animate-bounceInScale' : 'opacity-0'}`}>
               <h1 className="text-2xl sm:text-3xl font-bold text-base-content">Settings</h1>
@@ -226,18 +297,18 @@ const SettingsPage = () => {
           <div className="flex justify-center mb-6">
             <button
               onClick={handleEnableNotifications}
-              className={`flex items-center gap-2 rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-400 shadow-lg active:scale-95 ${isMounted ? 'animate-bounceInScale' : 'opacity-0'}`}
+              /* Added responsive padding & font size */
+              className="btn px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base transition-all duration-300"
               style={{
-                backgroundColor: "var(--secondary)",
-                color: "var(--secondary-content)",
-                animationDelay: "0.2s",
-                boxShadow: notificationsIsLight
-                  ? "0 0 16px 2px rgba(0,0,0,0.18)"
-                  : "0 0 16px 2px rgba(255,255,255,0.35)"
+                backgroundColor: THEME_COLORS[theme]?.secondary || "#4B5563",
+                color: THEME_COLORS[theme]?.secondaryContent || "#FFFFFF",
+                borderColor: isLightColor(THEME_COLORS[theme]?.secondary) 
+                  ? 'rgba(0,0,0,0.2)' 
+                  : 'rgba(255,255,255,0.2)'
               }}
             >
-              <Bell size={18} className="shrink-0" />
-              <span>Enable Notifications</span>
+              Enable Notifications
+              <Bell size={18} className="ml-2" />
             </button>
           </div>
 
@@ -336,7 +407,8 @@ const SettingsPage = () => {
               <h3 className="text-2xl font-semibold text-base-content">Preview</h3>
               <button
                 onClick={handleApplyTheme}
-                className={`flex items-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-400 shadow-lg active:scale-95 animate-bounceInScale ${previewFontClass}`}
+                /* Added responsive padding & font size */
+                className={`flex items-center gap-2 rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg active:scale-95 animate-bounceInScale ${previewFontClass}`}
                 style={{
                   backgroundColor: previewSecondary,
                   color: previewSecondaryContent,
@@ -353,7 +425,7 @@ const SettingsPage = () => {
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1 animate-glassMorph flex flex-col items-center">
                 <div
-                  className="relative w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden border-8"
+                  className="relative w-full max-w-xs sm:w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden border-8 mx-auto"
                   style={{
                     background: "transparent",
                     borderColor: THEME_COLORS[previewTheme]?.secondary || '#6b7280'
@@ -381,7 +453,11 @@ const SettingsPage = () => {
                           );
                         })}
                       </div>
-                      <form className="relative flex items-end gap-1 mt-2 px-1 py-1 bg-base-100/90 rounded-b-2xl border-t border-quaternary/10">
+                      {/* Mobile preview form */}
+                      <form
+                        className="relative flex flex-wrap items-end gap-1 mt-2 px-1 py-1 bg-base-100/90 rounded-b-2xl border-t border-quaternary/10"
+                        style={{ minWidth: 0 }}
+                      >
                         <button
                           type="button"
                           className="btn btn-circle btn-xs btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
@@ -392,7 +468,7 @@ const SettingsPage = () => {
                         </button>
                         <input
                           type="text"
-                          className="flex-1 input input-xs input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          className="flex-1 min-w-0 input input-xs input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
                           placeholder="Type your message..."
                           disabled
                         />
@@ -413,7 +489,7 @@ const SettingsPage = () => {
 
               <div className="flex-1 animate-glassMorph flex flex-col items-center">
                 <div
-                  className="relative w-full max-w-md rounded-t-[20px] rounded-b-[6px] shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+                  className="relative w-full max-w-md rounded-t-[20px] rounded-b-[6px] shadow-[0_4px_30px_rgba(0,0,0,0.3)] mx-auto"
                   style={{
                     background: "transparent",
                     borderTopColor: THEME_COLORS[previewTheme]?.secondary || '#9ca3af',
@@ -456,7 +532,11 @@ const SettingsPage = () => {
                       })}
                     </div>
                     <div className="mt-4 relative animate-fadeIn">
-                      <form className="flex items-center gap-3">
+                      {/* Desktop preview form */}
+                      <form
+                        className="flex flex-wrap items-center gap-3"
+                        style={{ minWidth: 0 }}
+                      >
                         <button
                           type="button"
                           className="btn btn-circle btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
@@ -467,7 +547,7 @@ const SettingsPage = () => {
                         </button>
                         <input
                           type="text"
-                          className="flex-1 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          className="flex-1 min-w-0 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
                           placeholder="Type your message..."
                           disabled
                         />
