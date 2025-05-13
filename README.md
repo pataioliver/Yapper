@@ -2,6 +2,8 @@
 
 A tesztelés megkönnyítése érdekében az alkalmazás elérhető ezen a linken is:  
 👉 **https://yapper-ajz8.onrender.com/**
+Ha ezt a tesztelési módot választod, akkor legyél tekintettel arra, hogy az app egy ingyenes szerveren fut.
+Eltarthat 1-2 percig mire betölt a szerver.
 
 ---
 
