@@ -69,3 +69,29 @@ export const sendNotification = async (req, res) => {
     res.status(500).json({ message: 'Failed to send notifications' });
   }
 };
+
+// Add this function to your existing controller
+export const getVapidKey = (req, res) => {
+  try {
+    const publicKey = process.env.VAPID_PUBLIC_KEY;
+    console.log("VAPID_PUBLIC_KEY:", publicKey);
+    
+    if (!publicKey) {
+      return res.status(500).json({ 
+        message: "VAPID public key not configured on server",
+        success: false 
+      });
+    }
+    
+    return res.status(200).json({ 
+      publicKey,
+      success: true 
+    });
+  } catch (error) {
+    console.error("Error in getVapidKey:", error);
+    return res.status(500).json({ 
+      message: "Server error retrieving VAPID key",
+      success: false 
+    });
+  }
+};

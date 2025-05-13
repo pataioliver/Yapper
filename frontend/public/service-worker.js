@@ -43,9 +43,35 @@ self.addEventListener("push", (event) => {
     const title = data.title || "New Notification";
     const options = {
         body: data.body || "You have a new message!",
-        icon: "/icon-192x192.png", // Path to your app's icon
-        badge: "/icon-192x192.png", // Path to your app's badge icon
+        icon: "/icons/icon-192x192.webp", // Updated path to match your cache entries
+        badge: "/icons/icon-192x192.webp",
+        data: {
+            url: data.url || "/"
+        }
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Add notification click handler
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.matchAll({type: 'window'}).then(clientList => {
+      const url = event.notification.data?.url || '/';
+      
+      // If a window is already open, focus it
+      for (const client of clientList) {
+        if ('focus' in client) {
+          return client.focus();
+        }
+      }
+      
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
 });
