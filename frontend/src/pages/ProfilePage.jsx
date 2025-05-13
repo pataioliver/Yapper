@@ -15,7 +15,7 @@ const ProfilePage = () => {
     reader.onload = async () => {
       const base64Image = reader.result;
       setSelectedImg(base64Image);
-      await updateProfile({ profilePic: base64Image });
+      await updateProfile({ profilePicture: base64Image });
     };
   };
 
@@ -32,7 +32,7 @@ const ProfilePage = () => {
           <div className="flex flex-col items-center gap-4 animate-glassMorph" style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
               <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
+                src={selectedImg || authUser.profilePicture || "/avatar.png"}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 border-base-content/20 shadow-[0_0_10px_rgba(255,255,255,0.15)] transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,255,255,0.25)]"
               />

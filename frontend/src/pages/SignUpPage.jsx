@@ -35,10 +35,20 @@ const SignupPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    signup(formData, navigate);
-  };
+  e.preventDefault();
+  if (!validateForm()) return;
+  const res = await signup(formData);
+  if (res?.token) {
+    navigate("/verify-email", {
+      state: {
+        token: res.token,
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      },
+    });
+  }
+};
 
    return (
     <div className="min-h-screen flex items-center justify-center bg-base-200/50 backdrop-blur-xl px-2">
