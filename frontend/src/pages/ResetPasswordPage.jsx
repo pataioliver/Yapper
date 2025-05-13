@@ -21,6 +21,10 @@ const ResetPasswordPage = () => {
       return toast.error("Both password fields are required");
     }
 
+    if (newPassword.length < 8) {
+      return toast.error("Password must be at least 8 characters");
+    }
+
     if (newPassword !== confirmPassword) {
       return toast.error("Passwords do not match");
     }

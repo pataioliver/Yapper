@@ -15,7 +15,7 @@ export const requestPasswordReset = async (req, res) => {
         }
 
         // Generate a reset token
-        
+
         const resetToken = crypto.randomBytes(32).toString("hex");
 
         // Hash the reset token using bcrypt
@@ -31,6 +31,10 @@ export const requestPasswordReset = async (req, res) => {
         const message = `Click the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
 
         await sendEmail(user.email, "Password Reset Request", message);
+
+        if (process.env.NODE_ENV !== "production") {
+            return res.status(200).json({ message: "Password reset email sent.", resetLink: resetUrl });
+        }
 
         res.status(200).json({ message: "Password reset email sent." });
     } catch (error) {
@@ -100,6 +104,14 @@ export const signup = async (req, res) => {
             "Verify Your Email",
             `Your verification code is: ${verificationCode}\n\nPlease use this code to verify your email address.`
         );
+
+        if (process.env.NODE_ENV !== "production") {
+            return res.status(200).json({
+                message: "Verification email sent. Please check your inbox.",
+                token,
+                verificationCode
+            });
+        }
 
         res.status(200).json({ message: "Verification email sent. Please check your inbox.", token });
     } catch (error) {
