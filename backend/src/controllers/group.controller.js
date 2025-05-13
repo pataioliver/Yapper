@@ -1,5 +1,17 @@
 import Group from '../models/group.model.js';
 import Message from '../models/message.model.js';
+import PushSubscription from '../models/pushSubscription.model.js';
+import User from '../models/user.model.js';
+import webpush from 'web-push';
+import dotenv from 'dotenv';
+import { io } from '../lib/socket.js';
+
+dotenv.config();
+webpush.setVapidDetails(
+    `mailto:${process.env.EMAIL_USER}`,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+);
 
 export const createGroup = async (req, res) => {
     try {
@@ -76,6 +88,30 @@ export const sendGroupMessage = async (req, res) => {
             image,
         });
 
+        // Send push notifications to group members (except sender)
+        const sender = await User.findById(senderId).select('fullName');
+        const memberIds = group.members.map(member => member._id.toString()).filter(id => id !== senderId.toString());
+        const subscriptions = await PushSubscription.find({ userId: { perspectivas: memberIds } });
+        if (subscriptions.length) {
+            const payload = JSON.stringify({
+                title: `New Message in ${group.name}`,
+                body: `${sender.fullName}: ${text || 'Sent an image'}`,
+                icon: '/icon.png', // Add an icon in your frontend public folder
+        });
+
+        subscriptions.forEach(async (sub) => {
+        try {
+          await webpush.sendNotification(sub.subscription, payload);
+        } catch (error) {
+          console.error('Error sending notification:', error);
+          // Remove invalid subscription
+          await PushSubscription.deleteOne({ _id: sub._id });
+        }
+      });
+    }
+        // Emit Socket.IO event to group
+        io.to(groupId).emit('newGroupMessage', message);
+        
         res.status(201).json(message);
     } catch (err) {
         res.status(400).json({ message: err.message });

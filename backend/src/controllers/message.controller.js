@@ -1,9 +1,19 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import Friendship from "../models/friendship.model.js";
+import PushSubscription from "../models/pushSubscription.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import webpush from "web-push";
+import dotenv from "dotenv";
+
+dotenv.config();
+webpush.setVapidDetails(
+  `mailto:${process.env.EMAIL_USER}`,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 
 export const areUsersFriends = async (userId1, userId2) => {
@@ -55,12 +65,11 @@ export const sendMessage = async (req, res) => {
 
     const friends = await areUsersFriends(senderId, receiverId);
     if (!friends) {
-      return res.status(403).json({ error: "You are not friends with this user." });
+      return res.status(403).json({ error: 'You are not friends with this user.' });
     }
 
     let imageUrl;
     if (image) {
-      // Upload base64 image to cloudinary
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
     }
@@ -74,9 +83,29 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
+    // Send push notification to receiver
+    const receiver = await User.findById(receiverId).select('fullName');
+    const subscriptions = await PushSubscription.find({ userId: receiverId });
+    if (subscriptions.length) {
+      const payload = JSON.stringify({
+        title: `New Message from ${receiver.fullName}`,
+        body: text || 'You received a new image message',
+        icon: '/icon.png'
+      });
+
+      subscriptions.forEach(async (sub) => {
+        try {
+          await webpush.sendNotification(sub.subscription, payload);
+        } catch (error) {
+          console.error('Error sending notification:', error);
+          await PushSubscription.deleteOne({ _id: sub._id });
+        }
+      });
+    }
+
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+      io.to(receiverSocketId).emit('newMessage', newMessage);
     }
 
     res.status(201).json(newMessage);
