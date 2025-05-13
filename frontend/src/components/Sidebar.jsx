@@ -156,7 +156,7 @@ const Sidebar = () => {
                   >
                     <div className="flex items-center gap-2">
                       <img
-                        src={req.requester.profilePic || "/avatar.png"}
+                        src={req.requester.profilePicture || "/avatar.png"}
                         alt=""
                         className="w-8 h-8 rounded-full"
                       />
@@ -199,7 +199,7 @@ const Sidebar = () => {
                     <div className={`avatar ${onlineUsers.includes(friend._id) ? "online" : ""}`}>
                       <div className="w-8 h-8 rounded-full">
                         <img
-                          src={friend.profilePic || "/avatar.png"}
+                          src={friend.profilePicture || "/avatar.png"}
                           alt={friend.fullName || "Profile"}
                         />
                       </div>
@@ -262,7 +262,7 @@ const Sidebar = () => {
                     >
                       <div className="w-8 h-8 rounded-full">
                         <img
-                          src={user.profilePic || "/avatar.png"}
+                          src={user.profilePicture || "/avatar.png"}
                           alt="Profile"
                         />
                       </div>

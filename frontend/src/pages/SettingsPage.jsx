@@ -229,7 +229,7 @@ const SettingsPage = () => {
                             <div className="chat-image avatar">
                               <div className="size-8 rounded-full border border-quaternary/50">
                                 <img
-                                  src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedChat.profilePic || "/avatar.png"}
+                                  src={isOwnMessage ? authUser.profilePicture || "/avatar.png" : selectedChat.profilePicture || "/avatar.png"}
                                   alt="profile pic"
                                   className="rounded-full"
                                 />
@@ -327,7 +327,7 @@ const SettingsPage = () => {
                           <div className="chat-image avatar">
                             <div className="size-10 rounded-full border border-quaternary/50">
                               <img
-                                src={isOwnMessage ? authUser.profilePic || "/avatar.png" : selectedChat.profilePic || "/avatar.png"}
+                                src={isOwnMessage ? authUser.profilePicture || "/avatar.png" : selectedChat.profilePicture || "/avatar.png"}
                                 alt="profile pic"
                                 className="rounded-full"
                               />

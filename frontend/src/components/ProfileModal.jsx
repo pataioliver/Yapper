@@ -58,7 +58,7 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                         <>
                             <h3 className="font-bold text-lg">{user.fullName}</h3>
                             <img
-                                src={user.profilePic || "/avatar.png"}
+                                src={user.profilePicture || "/avatar.png"}
                                 alt={user.fullName}
                                 className="w-24 h-24 rounded-full mx-auto my-4"
                             />
@@ -94,7 +94,7 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
                                                             disabled={isCreating}
                                                         />
                                                         <img
-                                                            src={friend.profilePic || friend.avatar || "/avatar.png"}
+                                                            src={friend.profilePicture || friend.avatar || "/avatar.png"}
                                                             alt={friend.fullName || friend.name || "Friend"}
                                                             className="w-6 h-6 rounded-full"
                                                         />

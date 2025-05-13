@@ -127,7 +127,7 @@ export const getGroupMessages = async (req, res) => {
             return res.status(403).json({ message: "Not a group member" });
         }
         
-        const messages = await Message.find({ groupId }).populate('senderId', 'fullName profilePic').sort({ createdAt: 1 });
+        const messages = await Message.find({ groupId }).populate('senderId', 'fullName profilePicture').sort({ createdAt: 1 });
         res.status(200).json(messages);
     } catch (err) {
         res.status(500).json({ message: err.message });

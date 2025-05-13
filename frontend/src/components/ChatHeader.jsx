@@ -30,7 +30,7 @@ const ChatHeader = ({ onProfileClick }) => {
                 <img
                   src={
                     selectedChat?.type === "user"
-                      ? selectedChat?.user?.profilePic || "/avatar.png"
+                      ? selectedChat?.user?.profilePicture || "/avatar.png"
                       : selectedChat?.group?.avatar || "/group.png"
                   }
                   alt={

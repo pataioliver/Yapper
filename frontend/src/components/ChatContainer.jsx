@@ -80,17 +80,17 @@ const ChatContainer = () => {
               ? message.senderId._id === authUser._id
               : message.senderId === authUser._id;
 
-          const getSenderProfilePic = (message) => {
-            if (isOwnMessage) return authUser.profilePic || "/avatar.png";
+          const getSenderprofilePicture = (message) => {
+            if (isOwnMessage) return authUser.profilePicture || "/avatar.png";
             if (selectedChat?.type === "user") {
-              return selectedChat?.user?.profilePic || "/avatar.png";
+              return selectedChat?.user?.profilePicture || "/avatar.png";
             }
             if (selectedChat?.type === "group") {
               // senderId may be an object or string
               const senderId = typeof message.senderId === "object" ? message.senderId._id : message.senderId;
               // Try to find the sender in group members (if you have them), or fallback to just the sender object
-              if (typeof message.senderId === "object" && message.senderId.profilePic) {
-                return message.senderId.profilePic;
+              if (typeof message.senderId === "object" && message.senderId.profilePicture) {
+                return message.senderId.profilePicture;
               }
               // fallback
               return "/avatar.png";
@@ -103,7 +103,7 @@ const ChatContainer = () => {
               <div className="chat-image avatar">
                 <div className="size-10 rounded-full border-2 border-quaternary/50 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-500 animate-subtleScale">
                   <img
-                    src={getSenderProfilePic(message)}
+                    src={getSenderprofilePicture(message)}
                     alt="profile pic"
                     className="rounded-full"
                   />
