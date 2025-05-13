@@ -31,6 +31,12 @@ cd ../frontend
 cp .env.example .env
 ```
 
+A privát és publikus vapi kulcsokat a következőképpen tudod generálni:
+
+```bash
+web-push generate-vapid-keys --json
+```
+
 **Fontos:**  
 - **Fejlesztői (dev) teszteléshez** az `.env` fájlokban a környezet legyen `development` (pl. `NODE_ENV=development`, `MODE=development`).
 - **Prod módhoz** állítsd át mindenhol `production`-ra (pl. `NODE_ENV=production`, `MODE=production`).
