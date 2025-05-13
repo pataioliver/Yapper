@@ -15,7 +15,7 @@ const NoChatSelected = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Hide on mobile when sidebar is open
+  // Don't render on mobile when sidebar is open
   if (isMobile && isSidebarOpen) {
     return null;
   }
