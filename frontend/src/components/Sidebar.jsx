@@ -145,6 +145,7 @@ const Sidebar = ({ openProfileModal }) => {
       style={{
         boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.08), 0 1.5px 8px 0 rgba(0,0,0,0.05)",
         transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        overflowX: "hidden", // <-- Prevent horizontal scroll
       }}
     >
       <div
@@ -259,21 +260,20 @@ const Sidebar = ({ openProfileModal }) => {
       </div>
 
       {/* Content area */}
-      <div className="overflow-y-auto flex-1 custom-scrollbar p-3">
+      <div className="overflow-y-auto flex-1 custom-scrollbar p-3" style={{ overflowX: "hidden" }}>
         {activeTab === "chats" && (
           <>
             {/* Pending Friend Requests */}
-            {pendingRequests && pendingRequests.length > 0 && (
+            {pendingRequests && pendingRequests.some(request => request.recipient._id === authUser?._id) && (
               <div className="mb-4">
                 <div className="text-xs text-quaternary-content/80 px-1 flex items-center gap-1 mb-2">
                   <UserPlus2 size={14} className="opacity-70" />
                   <span>Pending Friend Requests</span>
                 </div>
                 <div className="space-y-2">
-                  {pendingRequests.map(request => {
-                    // Show only requests where the current user is the recipient
-                    if (request.recipient._id !== authUser?._id) return null;
-                    return (
+                  {pendingRequests
+                    .filter(request => request.recipient._id === authUser?._id)
+                    .map(request => (
                       <div
                         key={request._id}
                         className="flex items-center gap-2 p-2 rounded-lg bg-base-200/60 border border-quaternary/10 animate-glassyPop"
@@ -303,8 +303,7 @@ const Sidebar = ({ openProfileModal }) => {
                           <X size={14} />
                         </button>
                       </div>
-                    );
-                  })}
+                    ))}
                 </div>
               </div>
             )}
