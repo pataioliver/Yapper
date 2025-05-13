@@ -156,7 +156,7 @@ const SettingsPage = () => {
       toast.error("Notifications not supported in this browser");
       return;
     }
-    
+
     try {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
@@ -164,7 +164,7 @@ const SettingsPage = () => {
           icon: "🔔",
           className: "bg-secondary/40 text-secondary-content backdrop-blur-md border border-secondary/80 animate-glassMorphPulse"
         });
-        
+
         // Register service worker if notifications are granted
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.register("/service-worker.js").catch(console.error);
@@ -184,7 +184,7 @@ const SettingsPage = () => {
   const notificationsSecondary = THEME_COLORS[theme]?.secondary || "#3b82f6";
   const notificationsSecondaryContent = THEME_COLORS[theme]?.["secondary-content"] || "#fff";
   const notificationsIsLight = isLightColor(notificationsSecondary);
-  
+
   // Use preview theme colors for apply button
   const previewSecondary = THEME_COLORS[previewTheme]?.secondary || "#3b82f6";
   const previewSecondaryContent = THEME_COLORS[previewTheme]?.["secondary-content"] || "#fff";
@@ -205,14 +205,8 @@ const SettingsPage = () => {
         <div className="space-y-6 sm:space-y-8">
           {/* Updated header with proper centering */}
           <div className="relative mb-6">
-            <Link 
-              to="/" 
-              className="absolute left-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-base-content/80 hover:text-tertiary transition-all duration-300"
-            >
-              <ArrowLeft size={18} className="shrink-0" />
-              <span className="text-sm sm:text-base">Back</span>
-            </Link>
-            
+
+
             {/* Centered title, similar to ProfilePage */}
             <div className={`text-center ${isMounted ? 'animate-bounceInScale' : 'opacity-0'}`}>
               <h1 className="text-2xl sm:text-3xl font-bold text-base-content">Settings</h1>
