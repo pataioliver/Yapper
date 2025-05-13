@@ -1,30 +1,32 @@
 import { MessageSquare } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const NoChatSelected = () => {
-  const { isSidebarOpen } = useChatStore();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+  const { isSidebarOpen, setSidebarOpen } = useChatStore();
+
   useEffect(() => {
+    // Set sidebar open by default on smaller screens
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const isMobileView = window.matchMedia("(max-width: 767px)").matches;
+      if (isMobileView) {
+        setSidebarOpen(true);
+      }
     };
     
+    // Run once on mount
+    handleResize();
+    
+    // Add listener for window resizing
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Hide on mobile when sidebar is open
-  if (isMobile && isSidebarOpen) {
-    return null;
-  }
+  }, [setSidebarOpen]);
 
   const leftRounding = isSidebarOpen ? 'rounded-l-none' : 'rounded-l-2xl';
   const rightRounding = 'rounded-r-2xl';
 
   return (
-    <div className={`w-full flex flex-1 flex-col items-center justify-center p-4 sm:p-8 md:p-16 bg-base-100/40 backdrop-blur-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph glassmorphism-header max-w-full ${leftRounding} ${rightRounding}`}>
+    <div className={`hidden md:flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8 md:p-16 bg-base-100/40 backdrop-blur-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph glassmorphism-header max-w-full ${leftRounding} ${rightRounding}`}>
       <div className="w-full max-w-md text-center space-y-6 relative">
         <div className="relative z-10">
           <div className="absolute inset-0 bg-gradient-radial from-tertiary/20 to-quaternary/10 rounded-full blur-2xl animate-pulseGlow opacity-50" />
