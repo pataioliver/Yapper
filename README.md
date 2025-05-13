@@ -2,6 +2,8 @@
 
 A tesztelés megkönnyítése érdekében az alkalmazás elérhető ezen a linken is:  
 👉 **https://yapper-ajz8.onrender.com/**
+Ha ezt a tesztelési módot választod, akkor legyél tekintettel arra, hogy az app egy ingyenes szerveren fut.
+Eltarthat 1-2 percig mire betölt a szerver.
 
 ---
 
@@ -29,6 +31,12 @@ cp .env.example .env
 # Frontend oldalon
 cd ../frontend
 cp .env.example .env
+```
+
+A privát és publikus vapid kulcsokat a következőképpen tudod generálni:
+
+```bash
+web-push generate-vapid-keys --json
 ```
 
 **Fontos:**  
