@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { THEMES, THEME_COLORS } from "../constants/themes";
 import { useThemeStore } from "../store/useThemeStore";
-import { Send, Check, Image, Bell } from "lucide-react";
+import { Send, Check, Image, Bell, Reply } from "lucide-react";
 import toast from "react-hot-toast";
 
 const PREVIEW_MESSAGES = [
@@ -93,15 +93,103 @@ const SettingsPage = () => {
   const previewSecondary = THEME_COLORS[previewTheme]?.secondary || "#3b82f6";
   const previewSecondaryContent = THEME_COLORS[previewTheme]?.["secondary-content"] || "#fff";
 
+  // Helper for preview chat bubble
+  const PreviewBubble = ({ message, quotedMessage, isOwnMessage }) => {
+    // Bubble color logic
+    const bubbleBg = isOwnMessage
+      ? "bg-secondary text-secondary-content"
+      : "bg-primary text-primary-content";
+    const bubbleBorder = isOwnMessage
+      ? "border-2 border-secondary"
+      : "border-2 border-primary";
+    const bubbleShadow = isOwnMessage
+      ? "shadow-[0_2px_16px_rgba(80,180,255,0.15)]"
+      : "shadow-[0_2px_16px_rgba(180,80,255,0.08)]";
+
+    // Quoted reply color logic
+    let quotedBg = "bg-quaternary text-quaternary-content border-l-4 border-quaternary";
+    let quotedText = "text-quaternary-content";
+    if (quotedMessage) {
+      if (quotedMessage.senderId === authUser._id) {
+        quotedBg = "bg-secondary text-secondary-content border-l-4 border-secondary";
+        quotedText = "text-secondary-content";
+      } else {
+        quotedBg = "bg-primary text-primary-content border-l-4 border-primary";
+        quotedText = "text-primary-content";
+      }
+    }
+
+    return (
+      <div
+        className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-glassyPop`}
+      >
+        <div className="chat-image avatar">
+          <div className="size-8 rounded-full border border-quaternary/50">
+            <img
+              src={isOwnMessage ? authUser.profilePicture : selectedChat.profilePicture}
+              alt="profile pic"
+              className="rounded-full"
+            />
+          </div>
+        </div>
+        <div className="chat-header mb-1">
+          <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedChat.fullName}</time>
+        </div>
+        <div
+          className={`chat-bubble flex flex-col relative group ${bubbleBg} ${bubbleBorder} ${bubbleShadow} rounded-2xl p-3 font-medium text-base animate-glassyPop`}
+        >
+          {quotedMessage && (
+            <div className={`mb-2 p-2 rounded-lg text-sm font-medium ${quotedBg} transition-all cursor-pointer`}>
+              <p className="flex items-center gap-1">
+                <Reply size={14} className="opacity-80" />
+                <span className="font-semibold">{quotedMessage.senderId === authUser._id ? "You" : selectedChat.fullName}</span>
+              </p>
+              <p className={`${quotedText} line-clamp-2`}>{quotedMessage.content}</p>
+            </div>
+          )}
+          <p className="text-content">{message.content}</p>
+          {message.reactions?.length > 0 && (
+            <div className="flex gap-1 mt-2">
+              {message.reactions.map((reaction, rIdx) => (
+                <span
+                  key={rIdx}
+                  className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 font-semibold
+                    ${isOwnMessage
+                      ? "bg-secondary text-secondary-content border-2 border-secondary"
+                      : "bg-primary text-primary-content border-2 border-primary"
+                    }
+                    backdrop-blur-md animate-glassyPop`}
+                >
+                  {reaction.emoji}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={`min-h-screen px-4 pt-20 pb-8 animate-glassMorphPulse bg-transparent`}>
+      <svg style={{ display: "none" }}>
+        <symbol id="icon-image" viewBox="0 0 24 24">
+          <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zm-2 0H5V5h14zm-7-3l2.03 2.71a1 1 0 0 0 1.54 0L19 13l-4.5-6-3.5 4.67L7 11z" />
+        </symbol>
+        <symbol id="icon-send" viewBox="0 0 24 24">
+          <path d="M3.4 20.29a1 1 0 0 0 1.09.21l16-7a1 1 0 0 0 0-1.8l-16-7A1 1 0 0 0 3 5v14a1 1 0 0 0 .4.79zM5 6.62L17.15 12 5 17.38z" />
+        </symbol>
+        <symbol id="icon-reply" viewBox="0 0 24 24">
+          <path d="M10 9V5l-7 7 7 7v-4.1c5.05 0 8.13 1.67 10 5.1-1-5-4-10-10-10z" />
+        </symbol>
+      </svg>
       <div className="max-w-5xl mx-auto bg-base-100/85 backdrop-blur-xl rounded-2xl p-6 shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all duration-700 animate-glassMorph border border-base-content/20">
         <div className="space-y-8">
           <div className="flex justify-between items-center animate-slideIn">
             <h3 className="text-2xl font-semibold text-base-content">Notifications</h3>
             <button
               onClick={handleEnableNotifications}
-              className="flex items-center gap-2 rounded-xl px-5 py-3 font-semibold hover:bg-opacity-90 transition-all duration-400 shadow-lg hover:shadow-xl active:scale-95 animate-bounceInScale"
+              className="flex items-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-400 shadow-lg active:scale-95 animate-bounceInScale"
               style={{
                 backgroundColor: notificationsSecondary,
                 color: notificationsSecondaryContent,
@@ -155,7 +243,7 @@ const SettingsPage = () => {
                       className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300 animate-glassMorph border-2 relative overflow-hidden
             ${isSelected
                           ? "scale-110 ring-4 ring-secondary shadow-[0_0_35px_var(--secondary)] border-secondary z-20"
-                          : "hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] border-white/10"
+                          : "border-white/10"
                         }
             ${isAnimating ? "z-30" : ""}
           `}
@@ -199,7 +287,7 @@ const SettingsPage = () => {
               <h3 className="text-2xl font-semibold text-base-content">Preview</h3>
               <button
                 onClick={handleApplyTheme}
-                className={`flex items-center gap-2 rounded-xl px-5 py-3 font-semibold hover:bg-opacity-90 transition-all duration-400 shadow-lg hover:shadow-xl active:scale-95 animate-bounceInScale ${previewFontClass}`}
+                className={`flex items-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-400 shadow-lg active:scale-95 animate-bounceInScale ${previewFontClass}`}
                 style={{
                   backgroundColor: previewSecondary,
                   color: previewSecondaryContent,
@@ -214,13 +302,11 @@ const SettingsPage = () => {
               {/* Mobile Preview */}
               <div className="flex-1 animate-glassMorph flex flex-col items-center">
                 <div
-                  className="relative w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden"
+                  className="relative w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden border-8 border-secondary"
                   style={{
                     background: THEME_COLORS[previewTheme]?.['base-100']
                       ? `linear-gradient(to bottom, ${THEME_COLORS[previewTheme]['base-100']} 0%, ${THEME_COLORS[previewTheme]['base-100']} 100%)`
                       : 'linear-gradient(to bottom, #fff 0%, #fff 100%)',
-                    borderColor: THEME_COLORS[previewTheme]?.secondary || '#6b7280',
-                    borderWidth: '12px'
                   }}
                 >
                   {/* Dynamic Island */}
@@ -229,71 +315,99 @@ const SettingsPage = () => {
                     style={{
                       backgroundColor: THEME_COLORS[previewTheme]?.secondary || '#6b7280'
                     }}
-                  >
-                  </div>
-
+                  ></div>
                   {/* Screen Content */}
                   <div className={`absolute inset-0 bg-base-100/15 backdrop-blur-2xl ${previewFontClass}`} data-theme={previewTheme}>
                     <div className="h-full flex flex-col pt-12 px-3 pb-3" style={{ backgroundColor: THEME_COLORS[previewTheme]?.['base-100'] || '#ffffff' }}>
+                      {/* Chat bubbles */}
                       <div className="flex-1 space-y-4 overflow-y-auto mt-2">
-                        {PREVIEW_MESSAGES.map((message, idx) => {
-                          const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
-                          const isOwnMessage = message.senderId === authUser._id;
-                          return (
-                            <div
-                              key={message.id}
-                              className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-slideIn`}
-                              style={{ animationDelay: `${idx * 0.12}s` }}
-                            >
-                              <div className="chat-image avatar">
-                                <div className="size-8 rounded-full border border-quaternary/50">
-                                  <img
-                                    src={isOwnMessage ? authUser.profilePicture : selectedChat.profilePicture}
-                                    alt="profile pic"
-                                    className="rounded-full"
-                                  />
-                                </div>
-                              </div>
-                              <div className="chat-header mb-1">
-                                <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedChat.fullName}</time>
-                              </div>
-                              <div
-                                className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
-                                  } backdrop-blur-2xl max-w-[75%] rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] transition-all duration-800 animate-glassMorphPulse font-medium text-base border border-base-content/10`}
-                              >
-                                {quotedMessage && (
-                                  <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
-                                    <p className="text-xs text-quaternary-content">
-                                      {quotedMessage.senderId === authUser._id ? "You" : selectedChat.fullName}
-                                    </p>
-                                    <p className="text-xs truncate max-w-[120px] text-quaternary-content">{quotedMessage.content}</p>
-                                  </div>
-                                )}
-                                <p className="text-sm">{message.content}</p>
-                                {message.reactions?.length > 0 && (
-                                  <div className="flex gap-1 mt-1">
-                                    {message.reactions.map((reaction, rIdx) => (
-                                      <span key={rIdx} className="text-xs text-tertiary-content">
-                                        {reaction.emoji}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
+                        {/* Example: Own message with reply and reaction */}
+                        <div className="chat chat-end animate-glassyPop">
+                          <div className="chat-image avatar">
+                            <div className="size-8 rounded-full border border-quaternary/50">
+                              <img
+                                src="/avatar.png"
+                                alt="profile pic"
+                                className="rounded-full"
+                              />
                             </div>
-                          );
-                        })}
+                          </div>
+                          <div className="chat-header mb-1 text-xs font-semibold text-quaternary-content/80">
+                            You
+                          </div>
+                          <div className="chat-bubble bg-secondary text-secondary-content border-2 border-secondary shadow-[0_2px_16px_rgba(80,180,255,0.15)] rounded-2xl p-3 font-medium text-base animate-glassyPop">
+                            <div className="mb-2 p-2 rounded-lg text-sm font-medium bg-primary text-primary-content border-l-4 border-primary transition-all cursor-pointer">
+                              <p className="flex items-center gap-1">
+                                <svg width="14" height="14" className="opacity-80"><use href="#icon-reply" /></svg>
+                                <span className="font-semibold">Ariana Grande</span>
+                              </p>
+                              <p className="text-primary-content line-clamp-2">Hey, are you coming to the party?</p>
+                            </div>
+                            Yes, I’ll be there! 🎉
+                            <div className="flex gap-1 mt-2">
+                              <span className="px-2 py-0.5 rounded-full text-xs flex items-center gap-1 font-semibold bg-secondary text-secondary-content border-2 border-secondary backdrop-blur-md animate-glassyPop">👍</span>
+                              <span className="px-2 py-0.5 rounded-full text-xs flex items-center gap-1 font-semibold bg-secondary text-secondary-content border-2 border-secondary backdrop-blur-md animate-glassyPop">❤️</span>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Example: Other's message with reply and reaction */}
+                        <div className="chat chat-start animate-glassyPop">
+                          <div className="chat-image avatar">
+                            <div className="size-8 rounded-full border border-quaternary/50">
+                              <img
+                                src="/avatar.png"
+                                alt="profile pic"
+                                className="rounded-full"
+                              />
+                            </div>
+                          </div>
+                          <div className="chat-header mb-1 text-xs font-semibold text-quaternary-content/80">
+                            Ariana Grande
+                          </div>
+                          <div className="chat-bubble bg-primary text-primary-content border-2 border-primary shadow-[0_2px_16px_rgba(180,80,255,0.08)] rounded-2xl p-3 font-medium text-base animate-glassyPop">
+                            <div className="mb-2 p-2 rounded-lg text-sm font-medium bg-secondary text-secondary-content border-l-4 border-secondary transition-all cursor-pointer">
+                              <p className="flex items-center gap-1">
+                                <svg width="14" height="14" className="opacity-80"><use href="#icon-reply" /></svg>
+                                <span className="font-semibold">You</span>
+                              </p>
+                              <p className="text-secondary-content line-clamp-2">See you soon!</p>
+                            </div>
+                            Hey, are you coming to the party?
+                            <div className="flex gap-1 mt-2">
+                              <span className="px-2 py-0.5 rounded-full text-xs flex items-center gap-1 font-semibold bg-primary text-primary-content border-2 border-primary backdrop-blur-md animate-glassyPop">😂</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-2 relative animate-fadeIn">
+                      {/* MessageInput Preview (Mobile) */}
+                      <form className="relative flex items-end gap-1 mt-2 px-1 py-1 bg-base-100/90 rounded-b-2xl border-t border-quaternary/10">
+                        <button
+                          type="button"
+                          className="btn btn-circle btn-xs btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
+                          disabled
+                          tabIndex={-1}
+                        >
+                          <svg width="16" height="16" fill="currentColor" className="opacity-80">
+                            <use href="#icon-image" />
+                          </svg>
+                        </button>
                         <input
                           type="text"
-                          placeholder="Type a message..."
-                          className="input w-full pl-8 pr-10 bg-base-100/15 backdrop-blur-lg border-base-content/10 text-sm shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                          className="flex-1 input input-xs input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          placeholder="Type your message..."
                           disabled
                         />
-                        <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-quaternary-content" />
-                        <Send className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary-content" />
-                      </div>
+                        <button
+                          type="button"
+                          className="btn btn-circle btn-xs bg-gradient-to-br from-primary to-secondary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
+                          disabled
+                          tabIndex={-1}
+                        >
+                          <svg width="14" height="14" fill="currentColor">
+                            <use href="#icon-send" />
+                          </svg>
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -341,59 +455,45 @@ const SettingsPage = () => {
                         const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
                         const isOwnMessage = message.senderId === authUser._id;
                         return (
-                          <div
+                          <PreviewBubble
                             key={message.id}
-                            className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} max-w-full animate-slideIn`}
-                            style={{ animationDelay: `${idx * 0.12}s` }}
-                          >
-                            <div className="chat-image avatar">
-                              <div className="size-10 rounded-full border border-quaternary/50">
-                                <img
-                                  src={isOwnMessage ? authUser.profilePicture : selectedChat.profilePicture}
-                                  alt="profile pic"
-                                  className="rounded-full"
-                                />
-                              </div>
-                            </div>
-                            <div className="chat-header mb-1">
-                              <time className="text-xs text-quaternary-content">{isOwnMessage ? "You" : selectedChat.fullName}</time>
-                            </div>
-                            <div
-                              className={`chat-bubble flex flex-col relative group ${isOwnMessage ? "bg-base-300/20 text-base-content" : "bg-secondary/30 text-secondary-content"
-                                } backdrop-blur-2xl max-w-[75%] rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] transition-all duration-800 animate-glassMorphPulse font-medium text-base border border-base-content/10`}
-                            >
-                              {quotedMessage && (
-                                <div className="mb-1 p-1.5 bg-quaternary/15 rounded-lg border-l-2 border-quaternary/50">
-                                  <p className="text-xs text-quaternary-content">
-                                    {quotedMessage.senderId === authUser._id ? "You" : selectedChat.fullName}
-                                  </p>
-                                  <p className="text-xs truncate max-w-[150px] text-quaternary-content">{quotedMessage.content}</p>
-                                </div>
-                              )}
-                              <p className="text-sm">{message.content}</p>
-                              {message.reactions?.length > 0 && (
-                                <div className="flex gap-1 mt-1">
-                                  {message.reactions.map((reaction, rIdx) => (
-                                    <span key={rIdx} className="text-xs text-tertiary-content">
-                                      {reaction.emoji}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                            message={message}
+                            quotedMessage={quotedMessage}
+                            isOwnMessage={isOwnMessage}
+                          />
                         );
                       })}
                     </div>
+                    {/* MessageInput Preview (Desktop) */}
                     <div className="mt-4 relative animate-fadeIn">
-                      <input
-                        type="text"
-                        placeholder="Type a message..."
-                        className="input  w-full pl-10 pr-12 bg-base-100/15 backdrop-blur-lg border-base-content/10 text-sm shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                        disabled
-                      />
-                      <Image className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 text-quaternary-content" />
-                      <Send className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-secondary-content" />
+                      <form className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="btn btn-circle btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
+                          disabled
+                          tabIndex={-1}
+                        >
+                          <svg width="20" height="20" fill="currentColor" className="opacity-80">
+                            <use href="#icon-image" />
+                          </svg>
+                        </button>
+                        <input
+                          type="text"
+                          className="flex-1 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          placeholder="Type your message..."
+                          disabled
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-circle bg-gradient-to-br from-primary to-secondary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
+                          disabled
+                          tabIndex={-1}
+                        >
+                          <svg width="18" height="18" fill="currentColor">
+                            <use href="#icon-send" />
+                          </svg>
+                        </button>
+                      </form>
                     </div>
                   </div>
 

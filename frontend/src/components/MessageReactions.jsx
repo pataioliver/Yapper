@@ -12,6 +12,7 @@ const MessageReactions = ({
   forceColor,
   show,
   displayMode = "full", // "full" or "reactionButton"
+  buttonClassName = "",
 }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [pickerPosition, setPickerPosition] = useState("right");
@@ -92,7 +93,7 @@ const MessageReactions = ({
             onClick={() => setShowPicker(prev => !prev)}
             className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md border
               ${bubbleColorBg} ${buttonTextColor} hover:brightness-110 
-              flex items-center transition-all`}
+              flex items-center transition-all ${buttonClassName}`}
             style={{
               boxShadow: isOwnMessage 
                 ? "0 2px 8px rgba(80,180,255,0.15)" 
@@ -166,7 +167,7 @@ const MessageReactions = ({
           onClick={() => setShowPicker(prev => !prev)}
           className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-md border
             ${bubbleColorBg} ${buttonTextColor} hover:brightness-110 
-            flex items-center transition-all`}
+            flex items-center transition-all ${buttonClassName}`}
           style={{
             boxShadow: isOwnMessage 
               ? "0 2px 8px rgba(80,180,255,0.15)" 

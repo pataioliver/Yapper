@@ -118,26 +118,32 @@ const GroupChat = ({ openProfileModal }) => {
                 { fullName: "Unknown", profilePicture: "" };
             const actionColor = isOwnMessage ? "secondary" : "primary";
             const bubbleBg = isOwnMessage
-              ? "bg-secondary/90 text-secondary-content backdrop-blur-md"
-              : "bg-base-200/90 text-base-content backdrop-blur-md";
+              ? "bg-secondary text-secondary-content"
+              : "bg-primary text-primary-content";
             const bubbleBorder = isOwnMessage
-              ? "border border-secondary/30"
-              : "border border-base-300/50";
+              ? "border-2 border-secondary"
+              : "border-2 border-primary";
             const bubbleShadow = isOwnMessage
               ? "shadow-[0_2px_16px_rgba(80,180,255,0.15)]"
               : "shadow-[0_2px_16px_rgba(180,80,255,0.08)]";
-            let quotedBg = "bg-primary/10 text-primary border-primary";
-            let quotedText = "text-primary";
+
+            // Improved quoted reply coloring
+            let quotedBg = "bg-quaternary text-quaternary-content border-l-4 border-quaternary";
+            let quotedText = "text-quaternary-content";
             if (quotedMessage) {
               const quotedSenderId =
                 typeof quotedMessage.senderId === "object"
                   ? quotedMessage.senderId._id
                   : quotedMessage.senderId;
               if (quotedSenderId === authUser._id) {
-                quotedBg = "bg-secondary/10 text-secondary border-secondary";
-                quotedText = "text-secondary";
+                quotedBg = "bg-secondary text-secondary-content border-l-4 border-secondary";
+                quotedText = "text-secondary-content";
+              } else {
+                quotedBg = "bg-primary text-primary-content border-l-4 border-primary";
+                quotedText = "text-primary-content";
               }
             }
+
             return (
               <div
                 id={`group-msg-${message._id}`}
@@ -179,7 +185,7 @@ const GroupChat = ({ openProfileModal }) => {
                 >
                   {quotedMessage && (
                     <div
-                      className={`mb-3 p-2 rounded-lg text-sm border-l-4 ${quotedBg} hover:brightness-110 transition-all cursor-pointer`}
+                      className={`mb-3 p-2 rounded-lg text-sm font-medium ${quotedBg} hover:brightness-110 transition-all cursor-pointer`}
                       onClick={() => {
                         // Find and scroll to the original message
                         const originalMsg = document.getElementById(`group-msg-${quotedMessage._id}`);
@@ -191,13 +197,15 @@ const GroupChat = ({ openProfileModal }) => {
                       }}
                       title="Click to find original message"
                     >
-                      <p className="font-medium flex items-center gap-1">
-                        <Reply size={14} className="text-base-content/60" />
-                        {getUserName(
-                          typeof quotedMessage.senderId === "object"
-                            ? quotedMessage.senderId._id
-                            : quotedMessage.senderId
-                        )}
+                      <p className="flex items-center gap-1">
+                        <Reply size={14} className="opacity-80" />
+                        <span className="font-semibold">
+                          {getUserName(
+                            typeof quotedMessage.senderId === "object"
+                              ? quotedMessage.senderId._id
+                              : quotedMessage.senderId
+                          )}
+                        </span>
                       </p>
                       <p className={`${quotedText} line-clamp-2`}>{quotedMessage.text}</p>
                     </div>
@@ -228,10 +236,12 @@ const GroupChat = ({ openProfileModal }) => {
                       ).map(([emoji, data]) => (
                         <div
                           key={emoji}
-                          className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 ${isOwnMessage
-                            ? "bg-secondary/40 text-secondary-content border border-secondary/30"
-                            : "bg-base-100/60 text-base-content border border-base-300/40"
-                            } backdrop-blur-md animate-glassyPop`}
+                          className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 font-semibold
+                            ${isOwnMessage
+                              ? "bg-secondary text-secondary-content border-2 border-secondary"
+                              : "bg-primary text-primary-content border-2 border-primary"
+                            }
+                            backdrop-blur-md animate-glassyPop`}
                           style={{
                             boxShadow: isOwnMessage
                               ? "0 2px 8px rgba(80,180,255,0.1)"
@@ -241,7 +251,7 @@ const GroupChat = ({ openProfileModal }) => {
                           title={`${data.count} ${data.users.includes(authUser._id) ? '(including you)' : ''}`}
                         >
                           <span>{emoji}</span>
-                          <span className="font-medium">{data.count}</span>
+                          <span className="font-bold">{data.count}</span>
                         </div>
                       ))}
                     </div>
@@ -263,8 +273,8 @@ const GroupChat = ({ openProfileModal }) => {
                     onClick={() => handleReply(message)}
                     className={`text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5
                       ${isOwnMessage
-                        ? "bg-secondary/30 text-secondary-content border border-secondary/40"
-                        : "bg-base-200/60 text-base-content border border-base-300/50"
+                        ? "bg-secondary text-secondary-content border-2 border-secondary"
+                        : "bg-primary text-primary-content border-2 border-primary"
                       } 
                       backdrop-blur-md hover:brightness-110 transition-all animate-glassyPop`}
                     style={{
