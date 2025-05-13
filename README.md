@@ -31,7 +31,7 @@ cd ../frontend
 cp .env.example .env
 ```
 
-A privát és publikus vapi kulcsokat a következőképpen tudod generálni:
+A privát és publikus vapid kulcsokat a következőképpen tudod generálni:
 
 ```bash
 web-push generate-vapid-keys --json
