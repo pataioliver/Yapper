@@ -11,6 +11,16 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY
 );
 
+// Helper function to fix FCM endpoint format if needed
+const fixFcmEndpoint = (endpoint) => {
+  // Check if it's an FCM endpoint with the old format
+  if (endpoint && endpoint.includes('fcm.googleapis.com/fcm/send/')) {
+    // Transform from /fcm/send/ to /wp/ format
+    return endpoint.replace('fcm.googleapis.com/fcm/send/', 'fcm.googleapis.com/wp/');
+  }
+  return endpoint;
+};
+
 // Subscribe to push notifications
 export const subscribe = async (req, res) => {
   try {
@@ -52,8 +62,15 @@ export const sendNotification = async (req, res) => {
     const results = await Promise.all(
       subscriptions.map(async (sub) => {
         try {
-          await webpush.sendNotification(sub.subscription, payload);
-          return { status: 'success', endpoint: sub.subscription.endpoint };
+          // Create a copy of the subscription with potentially fixed endpoint
+          const fixedSubscription = {
+            ...sub.subscription,
+            endpoint: fixFcmEndpoint(sub.subscription.endpoint)
+          };
+          
+          console.log('Sending notification to:', fixedSubscription.endpoint);
+          await webpush.sendNotification(fixedSubscription, payload);
+          return { status: 'success', endpoint: fixedSubscription.endpoint };
         } catch (error) {
           console.error('Error sending notification to', sub.subscription.endpoint, error);
           // Remove invalid subscription
