@@ -1,38 +1,36 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const groupSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  avatar: {
-    type: String, // URL or path to group avatar image
-    default: '',
-  },
-  members: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+const groupSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
       required: true,
-    }
-  ],
-  admins: [
-    {
+    },
+    admin: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }
-  ],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+      ref: "User",
+      required: true,
+    },
+    members: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
+    avatar: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    isDirectGroup: {
+      type: Boolean,
+      default: false,
+    },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  }
-});
+  { timestamps: true }
+);
 
-const Group = mongoose.model('Group', groupSchema);
+const Group = mongoose.model("Group", groupSchema);
+
 export default Group;

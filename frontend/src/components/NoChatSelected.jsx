@@ -1,10 +1,22 @@
 import { MessageSquare } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
+import { useEffect, useState } from "react";
 
 const NoChatSelected = () => {
   const { isSidebarOpen } = useChatStore();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  if (window.innerWidth < 1024 && isSidebarOpen) {
+  // Hide on mobile when sidebar is open
+  if (isMobile && isSidebarOpen) {
     return null;
   }
 

@@ -1,112 +1,149 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Send, Image, X } from "lucide-react";
+import toast from "react-hot-toast";
 
-const MessageInput = ({ replyColor }) => {
-  const { sendMessage, selectedChat, replyingTo, setReplyingTo } = useChatStore();
+const MessageInput = ({ replyColor, isGroup = false, groupId }) => {
+  const { 
+    sendMessage, 
+    selectedUser, 
+    replyingTo, 
+    setReplyingTo,
+    sendGroupMessage,
+    users,
+    selectedGroup
+  } = useChatStore();
+  const { authUser } = useAuthStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleImageChange = (e) => {
+  const effectiveGroupId = isGroup ? (groupId || selectedGroup?._id) : null;
+
+  const handleChange = (e) => setText(e.target.value);
+
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImage(reader.result);
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (!file.type.match('image.*')) {
+      toast.error("Only image files are allowed");
+      return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should not exceed 5MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result); // base64 string
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleSendMessage = async () => {
-    if (!text.trim() && !image) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSending) return;
+    if (!text.trim() && !image) {
+      toast.error("Please enter a message or select an image");
+      return;
+    }
+    const recipient = isGroup ? effectiveGroupId : selectedUser?._id;
+    if (!recipient) {
+      toast.error(isGroup ? "No group selected" : "No recipient selected");
+      return;
+    }
+    setIsSending(true);
     try {
-      await sendMessage({ text, image, replyToId: replyingTo?._id || null });
-      setText("");
-      setImage(null);
-      setReplyingTo(null);
+      const payload = { text, image, replyToId: replyingTo?._id || null };
+      let result = null;
+      if (isGroup) {
+        result = await sendGroupMessage(effectiveGroupId, payload);
+      } else {
+        result = await sendMessage(payload);
+      }
+      if (result) {
+        setText("");
+        setImage(null);
+        setImagePreview("");
+      }
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Error sending message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+  const getReplyingToName = () => {
+    if (!replyingTo) return "";
+    if (replyingTo.senderId === authUser._id) return "yourself";
+    const user = users.find(u => u._id === replyingTo.senderId);
+    return user ? user.fullName : "someone";
   };
-
-  // Use replyColor prop for reply box coloring
-  const replyBg = replyColor === "primary" ? "bg-primary/10" : replyColor === "secondary" ? "bg-secondary/10" : "bg-base-200";
-  const replyText = replyColor === "primary" ? "text-primary-content" : replyColor === "secondary" ? "text-secondary-content" : "text-base-content";
-  const replyBorder = replyColor === "primary" ? "border-primary" : replyColor === "secondary" ? "border-secondary" : "border-base-300";
 
   return (
-    <div className="p-4 w-full bg-base-100/60 backdrop-blur-2xl border-t border-quaternary/20 animate-glassMorphPulse glassmorphism-header">
+    <div className="p-4 border-t border-quaternary/10 bg-base-100/80 backdrop-blur-xl shadow-[0_-2px_20px_rgba(0,0,0,0.05)]">
       {replyingTo && (
-        <div className={`mb-2 p-2 ${replyBg} backdrop-blur-lg rounded-lg flex items-center justify-between shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-glassMorph border-l-4 ${replyBorder}`}>
+        <div className={`flex items-center justify-between mb-2 p-2 rounded-lg bg-${replyColor || "primary"}/10 border-l-4 border-${replyColor || "primary"}`}>
           <div>
-            <p className="text-xs text-quaternary-content">
-              Replying to {
-                replyingTo.senderId === (selectedChat?.type === "user"
-                  ? selectedChat?.user?._id
-                  : selectedChat?.group?._id)
-                  ? (selectedChat?.type === "user"
-                    ? selectedChat?.user?.fullName
-                    : selectedChat?.group?.name)
-                  : "You"
-              }
-            </p>
-            <p className="text-sm truncate max-w-[200px] text-quaternary-content">{replyingTo.text || (replyingTo.image && "Image")}</p>
+            <div className="text-sm font-medium">Replying to {getReplyingToName()}</div>
+            <div className="text-xs opacity-75 truncate max-w-xs">{replyingTo.text}</div>
           </div>
-          <button
-            onClick={() => setReplyingTo(null)}
-            className={`p-1 ${replyBg} backdrop-blur-2xl ${replyText} rounded-full hover:bg-opacity-40 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-all duration-500 animate-subtleScale`}
-          >
-            <X size={16} className={replyText} />
+          <button onClick={() => setReplyingTo(null)} className="btn btn-ghost btn-sm btn-circle">
+            <X size={16} />
           </button>
         </div>
       )}
-      <div className="flex items-center gap-2 bg-base-100/70 backdrop-blur-2xl rounded-xl p-2 shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.5)] transition-all duration-500 animate-glassMorph glassmorphism-header">
+      {imagePreview && (
+        <div className="relative mb-2">
+          <img src={imagePreview} alt="Selected" className="h-40 object-contain rounded-lg border border-base-300" />
+          <button onClick={() => { setImage(null); setImagePreview(""); }} className="btn btn-circle btn-sm btn-error absolute top-2 right-2">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="flex items-center gap-3">
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <button 
+          type="button" 
+          onClick={() => fileInputRef.current?.click()} 
+          className="btn btn-circle btn-ghost bg-base-200/70 backdrop-blur-md hover:bg-base-300/80 transition-all"
+        >
+          <Image size={20} className="opacity-70" />
+        </button>
         <input
           type="text"
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 input input-bordered rounded-xl text-base sm:text-lg focus:ring-2 focus:ring-tertiary focus:bg-base-100/80 backdrop-blur-lg border-base-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-500 animate-glassMorphPulse"
-          placeholder="Type a message..."
+          onChange={handleChange}
+          className="flex-1 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner"
+          placeholder="Type your message..."
+          disabled={isSending}
+          style={{
+            borderColor: "rgba(255,255,255,0.15)",
+          }}
         />
-        <label className="btn btn-md btn-circle bg-tertiary/20 backdrop-blur-2xl text-tertiary-content hover:bg-tertiary/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-all duration-500 animate-subtleScale">
-          <Image size={20} className="text-tertiary-content" />
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
-          />
-        </label>
-        <button
-          onClick={handleSendMessage}
-          className="btn btn-md btn-circle bg-tertiary/40 backdrop-blur-2xl text-tertiary-content hover:bg-tertiary/60 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-all duration-500 animate-glassMorphPulse"
-          disabled={!text.trim() && !image}
+        <button 
+          type="submit" 
+          className={`btn btn-circle gradient-btn ${isSending ? 'loading' : ''}`} 
+          disabled={(!text.trim() && !image) || isSending}
+          style={{
+            background: "linear-gradient(135deg, hsl(var(--p)) 0%, hsl(var(--s)) 100%)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          }}
         >
-          <Send size={20} className="text-tertiary-content" />
+          {!isSending && <Send size={18} className="text-primary-content" />}
         </button>
-      </div>
-      {image && (
-        <div className="mt-2 relative animate-glassMorph">
-          <img
-            src={image}
-            alt="Preview"
-            className="sm:max-w-[100px] rounded-lg border border-quaternary shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all duration-500 animate-subtleScale"
-          />
-          <button
-            onClick={() => setImage(null)}
-            className="absolute top-0 right-0 p-1 bg-quaternary/20 backdrop-blur-2xl text-quaternary-content rounded-full hover:bg-quaternary/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-all duration-500 animate-subtleScale"
-          >
-            <X size={16} className="text-quaternary-content" />
-          </button>
-        </div>
-      )}
+      </form>
     </div>
   );
 };

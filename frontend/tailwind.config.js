@@ -17,26 +17,32 @@ export default {
         },
       },
       animation: {
-        fadeIn: "fadeIn 1s ease-in-out",
-        slideIn: "slideIn 0.7s ease-in-out",
+        fadeIn: "fadeIn 0.5s ease-in-out forwards",
+        slideIn: "slideIn 0.5s ease-in-out forwards",
         slideDown: "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-        pulseGlow: "pulseGlow 1.5s ease-in-out infinite",
+        pulseGlow: "pulseGlow 2s infinite",
         pulseGlowDark: "pulseGlowDark 1.5s ease-in-out infinite",
-        scaleIn: "scaleIn 0.8s ease-out",
-        glassMorph: "glassMorph 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards",
-        glassMorphPulse: "glassMorphPulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        scaleIn: "scaleIn 0.3s ease-out forwards",
+        glassMorph: "glassMorph 3s ease infinite",
+        glassMorphPulse: "glassMorphPulse 4s ease infinite",
         dynamicScale: "dynamicScale 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-        bounceInScale: "bounceInScale 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        bounceInScale: "bounceInScale 0.5s ease-out forwards",
         gentleBounce: "gentleBounce 2s ease-in-out infinite",
         underlineGrow: "underlineGrow 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         subtleScale: "subtleScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         sleekThemeSelect: "sleekThemeSelect 1s cubic-bezier(0.22, 1, 0.36, 1)",
         // iOS/modern glassy animations:
-        glassyPop: "glassyPop 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
-        glassySlideIn: "glassySlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        glassyPop: "glassyPop 0.3s ease-out forwards",
+        glassySlideIn: "glassySlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards",
         glassyFadeIn: "glassyFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
         glassyBounce: "glassyBounce 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-        glassyPulse: "glassyPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+        glassyPulse: "glassyPulse 2s ease-in-out infinite",
+        highlight: "highlight 2s ease-in-out",
+        highlightGlow: "highlightGlow 1.5s ease-in-out infinite",
+        glassyReveal: "glassyReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        // Added new animations:
+        subtlePulse: "subtlePulse 2s ease-in-out infinite",
+        'highlight-quoted': "highlightQuoted 1.5s ease-in-out",
       },
       keyframes: {
         fadeIn: {
@@ -64,12 +70,14 @@ export default {
           "100%": { opacity: 1, transform: "scale(1)" },
         },
         glassMorph: {
-          "0%": { opacity: 0, transform: "scale(0.97) translateY(8px)", filter: "blur(1.5px)" },
-          "100%": { opacity: 1, transform: "scale(1) translateY(0)", filter: "blur(0)" },
+          "0%": { backdropFilter: "blur(5px) saturate(100%)" },
+          "50%": { backdropFilter: "blur(7px) saturate(110%)" },
+          "100%": { backdropFilter: "blur(5px) saturate(100%)" },
         },
         glassMorphPulse: {
-          "0%": { opacity: 0, transform: "scale(0.98) translateY(10px)", filter: "blur(2px)", boxShadow: "0 0 15px rgba(255,255,255,0.2)" },
-          "100%": { opacity: 1, transform: "scale(1) translateY(0)", filter: "blur(0)", boxShadow: "0 0 25px rgba(255,255,255,0.4)" },
+          "0%": { backdropFilter: "blur(5px) saturate(100%)", boxShadow: "0 0 10px rgba(255, 255, 255, 0.1)" },
+          "50%": { backdropFilter: "blur(8px) saturate(120%)", boxShadow: "0 0 20px rgba(255, 255, 255, 0.2)" },
+          "100%": { backdropFilter: "blur(5px) saturate(100%)", boxShadow: "0 0 10px rgba(255, 255, 255, 0.1)" },
         },
         dynamicScale: {
           "0%": { transform: "scale(0.95)", opacity: 0.8 },
@@ -88,14 +96,12 @@ export default {
         },
         // iOS/modern glassy keyframes:
         glassyPop: {
-          "0%": { opacity: 0, transform: "scale(0.92) translateY(12px)" },
-          "60%": { opacity: 1, transform: "scale(1.04) translateY(-2px)" },
+          "0%": { opacity: 0, transform: "scale(0.95) translateY(10px)" },
           "100%": { opacity: 1, transform: "scale(1) translateY(0)" },
         },
         glassySlideIn: {
-          "0%": { opacity: 0, transform: "translateY(32px) scale(0.98)" },
-          "80%": { opacity: 1, transform: "translateY(-4px) scale(1.02)" },
-          "100%": { opacity: 1, transform: "translateY(0) scale(1)" },
+          "0%": { opacity: 0, transform: "translateX(-40px)" },
+          "100%": { opacity: 1, transform: "translateX(0)" },
         },
         glassyFadeIn: {
           "0%": { opacity: 0 },
@@ -107,8 +113,31 @@ export default {
           "100%": { transform: "scale(1)" },
         },
         glassyPulse: {
-          "0%, 100%": { boxShadow: "0 0 16px 0 rgba(80,180,255,0.18)" },
-          "50%": { boxShadow: "0 0 32px 4px rgba(80,180,255,0.28)" },
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.7 },
+        },
+        highlight: {
+          "0%, 100%": { backgroundColor: "rgba(255, 255, 0, 0.3)" },
+          "50%": { backgroundColor: "rgba(255, 255, 0, 0.6)" },
+        },
+        highlightGlow: {
+          "0%, 100%": { boxShadow: "0 0 10px rgba(255, 255, 0, 0.4)" },
+          "50%": { boxShadow: "0 0 20px rgba(255, 255, 0, 0.6)" },
+        },
+        glassyReveal: {
+          "0%": { opacity: 0, transform: "translateY(10px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+        // Added new keyframes:
+        subtlePulse: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.6 },
+        },
+        highlightQuoted: {
+          "0%": { backgroundColor: "rgba(var(--tertiary-rgb), 0)" },
+          "30%": { backgroundColor: "rgba(var(--tertiary-rgb), 0.2)" },
+          "70%": { backgroundColor: "rgba(var(--tertiary-rgb), 0.2)" },
+          "100%": { backgroundColor: "rgba(var(--tertiary-rgb), 0)" },
         },
       },
       fontFamily: {

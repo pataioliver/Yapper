@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useChatStore } from "../store/useChatStore";
+import { useState, useEffect } from "react";
+import { X, UserPlus, Users } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import toast from "react-hot-toast";
+import { useChatStore } from "../store/useChatStore";
 
 const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
     const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -11,139 +11,269 @@ const ProfileModal = ({ type = "user", user, group, open, onClose }) => {
     const { authUser } = useAuthStore();
     const { createGroup, friends } = useChatStore();
 
+    useEffect(() => {
+        // If opening for creating a new group directly, set showCreateGroup to true
+        if (open && type === "group" && !group) {
+            setShowCreateGroup(true);
+            // If opening with a user, pre-select that user for the group
+            if (user && user._id) {
+                setSelectedFriends([user._id]);
+            }
+        }
+    }, [open, type, group, user]);
+
+    // Handle close via click outside
+    const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    if (!open) return null;
+    
+    // Updated condition to work with direct group creation
     if (type === "user" && !user) return null;
-    if (type === "group" && !group) return null;
+    if (type === "group" && !group && !showCreateGroup) return null;
 
     const handleToggleFriend = (friendId) => {
-        setSelectedFriends((prev) =>
-            prev.includes(friendId)
-                ? prev.filter((id) => id !== friendId)
-                : [...prev, friendId]
-        );
+        if (selectedFriends.includes(friendId)) {
+            setSelectedFriends(selectedFriends.filter(id => id !== friendId));
+        } else {
+            setSelectedFriends([...selectedFriends, friendId]);
+        }
     };
 
     const handleCreateGroup = async () => {
-        if (!groupName.trim()) return;
+        if (!groupName.trim() || selectedFriends.length === 0) return;
+        
         setIsCreating(true);
         try {
-            // Always include yourself and the user
-            const members = [
-                authUser._id,
-                user._id,
-                ...selectedFriends.filter(
-                    (id) => id !== authUser._id && id !== user._id
-                ),
-            ];
             await createGroup({
                 name: groupName,
-                members,
+                members: [...selectedFriends, authUser._id]
             });
-            setShowCreateGroup(false);
             setGroupName("");
             setSelectedFriends([]);
+            setShowCreateGroup(false);
             onClose();
-        } catch (e) {
-            toast.error("Failed to create group");
+        } catch (error) {
+            console.error("Failed to create group:", error);
         } finally {
             setIsCreating(false);
         }
     };
 
+    // If we're creating a new group (not showing details of existing)
+    const isNewGroup = type === "group" && !group;
+
     return (
-        <>
-            <input type="checkbox" id="profile-modal" className="modal-toggle" checked={!!open} readOnly />
-            <div className="modal" role="dialog">
-                <div className="modal-box">
-                    {type === "user" && (
-                        <>
-                            <h3 className="font-bold text-lg">{user.fullName}</h3>
-                            <img
-                                src={user.profilePic || "/avatar.png"}
-                                alt={user.fullName}
-                                className="w-24 h-24 rounded-full mx-auto my-4"
-                            />
-                            {/* Add more user info here */}
-                            <div className="mt-4">
-                                {!showCreateGroup ? (
-                                    <button
-                                        className="btn btn-primary w-full"
-                                        onClick={() => setShowCreateGroup(true)}
-                                    >
-                                        Create Group with {user.fullName}
-                                    </button>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <input
-                                            type="text"
-                                            className="input input-bordered w-full"
-                                            placeholder="Group name"
-                                            value={groupName}
-                                            onChange={(e) => setGroupName(e.target.value)}
-                                            disabled={isCreating}
-                                        />
-                                        <div className="max-h-40 overflow-y-auto border rounded-lg p-2 mb-2">
-                                            <p className="font-semibold mb-1 text-sm">Add friends:</p>
-                                            {friends
-                                                .filter(f => f._id !== user._id && f._id !== authUser._id)
-                                                .map(friend => (
-                                                    <label key={friend._id} className="flex items-center gap-2 cursor-pointer py-1 px-2 rounded hover:bg-base-200/40">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedFriends.includes(friend._id)}
-                                                            onChange={() => handleToggleFriend(friend._id)}
-                                                            disabled={isCreating}
-                                                        />
-                                                        <img
-                                                            src={friend.profilePic || friend.avatar || "/avatar.png"}
-                                                            alt={friend.fullName || friend.name || "Friend"}
-                                                            className="w-6 h-6 rounded-full"
-                                                        />
-                                                        <span className="text-sm">{friend.fullName || friend.name || "Unknown"}</span>
-                                                    </label>
-                                                ))}
-                                        </div>
-                                        <button
-                                            className="btn btn-success w-full"
-                                            onClick={handleCreateGroup}
-                                            disabled={isCreating || !groupName.trim()}
-                                        >
-                                            {isCreating ? "Creating..." : "Create Group"}
-                                        </button>
-                                        <button
-                                            className="btn btn-ghost w-full"
-                                            onClick={() => setShowCreateGroup(false)}
-                                            disabled={isCreating}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
-                    {type === "group" && (
-                        <>
-                            <h3 className="font-bold text-lg">{group.name}</h3>
-                            <img
-                                src={group.avatar || "/group.png"}
-                                alt={group.name}
-                                className="w-24 h-24 rounded-full mx-auto my-4"
-                            />
-                            <p className="text-base text-center mb-2">
-                                Members: {group.members?.length || 0}
-                            </p>
-                            {/* Add more group info here */}
-                        </>
-                    )}
-                    <div className="modal-action">
-                        <button className="btn" onClick={onClose}>
-                            Close
-                        </button>
-                    </div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleBackdropClick}>
+            <div className="bg-base-100 rounded-2xl shadow-lg w-full max-w-md overflow-hidden animate-popIn" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-base-300 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">
+                        {isNewGroup || showCreateGroup ? "Create New Group" : 
+                         type === "user" ? user?.fullName : group?.name}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="btn btn-circle btn-ghost btn-sm"
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
-                <label className="modal-backdrop" onClick={onClose}></label>
+                
+                <div className="p-6">
+                    {/* Profile Information for existing user/group */}
+                    {!showCreateGroup && !isNewGroup && (
+                        <div className="flex items-center flex-col gap-4 mb-6">
+                            <div className="avatar">
+                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-3xl font-semibold">
+                                    {type === "user" && (
+                                        user.profilePicture || user.profilePic ? (
+                                            <img
+                                                src={user.profilePicture || user.profilePic}
+                                                alt={user.fullName}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <img src="/avatar.png" alt={user.fullName} className="w-full h-full object-cover" />
+                                        )
+                                    )}
+                                    {type === "group" && (
+                                        group.avatar ? (
+                                            <img
+                                                src={group.avatar}
+                                                alt={group.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            group.name?.charAt(0)
+                                        )
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Display User/Group info */}
+                            {type === "user" && (
+                                <div className="text-center">
+                                    <h2 className="text-xl font-bold mb-1">{user.fullName}</h2>
+                                    <p className="text-quaternary-content/80 text-sm">{user.email}</p>
+                                </div>
+                            )}
+                            
+                            {type === "group" && (
+                                <div className="text-center">
+                                    <h2 className="text-xl font-bold mb-1">{group.name}</h2>
+                                    <p className="text-quaternary-content/80 text-sm">
+                                        {group.members?.length || 0} members
+                                    </p>
+                                    {group.description && (
+                                        <p className="mt-2 text-base-content">{group.description}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Group Members List */}
+                    {type === "group" && !showCreateGroup && !isNewGroup && (
+                        <div className="mt-4">
+                            <h3 className="font-medium mb-2 text-quaternary-content/90 flex items-center gap-2">
+                                <Users size={16} /> Members
+                            </h3>
+                            <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2">
+                                {group.members?.map(member => (
+                                    <div key={member._id} className="flex items-center gap-2 p-2 rounded-lg">
+                                        <div className="avatar">
+                                            <div className="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
+                                                {member.profilePicture ? (
+                                                    <img
+                                                        src={member.profilePicture}
+                                                        alt={member.fullName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    member.fullName?.charAt(0)
+                                                )}
+                                            </div>
+                                        </div>
+                                        <span>{member.fullName}</span>
+                                        {group.admin && member._id === group.admin._id && (
+                                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                                                Admin
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Create New Group Form */}
+                    {(showCreateGroup || isNewGroup) && (
+                        <div className="animate-popIn space-y-4">
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text">Group Name</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="input input-bordered w-full"
+                                    placeholder="Enter group name"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
+                                />
+                            </div>
+                            
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text">Select Friends</span>
+                                </label>
+                                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2">
+                                    {friends.length > 0 ? (
+                                        friends.map(friendship => {
+                                            // Get the friend object
+                                            const friend = friendship.requester._id === authUser._id ? 
+                                                friendship.recipient : friendship.requester;
+                                                
+                                            return (
+                                                <div
+                                                    key={friend._id}
+                                                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all ${
+                                                        selectedFriends.includes(friend._id) ? "bg-primary/10" : ""
+                                                    }`}
+                                                    onClick={() => handleToggleFriend(friend._id)}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        className="checkbox checkbox-sm checkbox-primary"
+                                                        checked={selectedFriends.includes(friend._id)}
+                                                        onChange={() => {}}
+                                                    />
+                                                    <div className="avatar">
+                                                        <div className="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
+                                                            {friend.profilePicture ? (
+                                                                <img
+                                                                    src={friend.profilePicture}
+                                                                    alt={friend.fullName}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                friend.fullName?.charAt(0)
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <span>{friend.fullName}</span>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="text-center py-4 text-quaternary-content/60">
+                                            Add some friends first to create a group
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button 
+                                    className="btn btn-ghost" 
+                                    onClick={() => { 
+                                        if (type === "user") {
+                                            setShowCreateGroup(false);
+                                        } else {
+                                            onClose();
+                                        }
+                                    }}
+                                    disabled={isCreating}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className="btn btn-primary" 
+                                    onClick={handleCreateGroup}
+                                    disabled={!groupName.trim() || selectedFriends.length === 0 || isCreating}
+                                >
+                                    {isCreating ? "Creating..." : "Create Group"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {type === "user" && !showCreateGroup && user && user._id !== authUser._id && (
+                        <div className="flex gap-2 justify-center mt-2">
+                            <button 
+                                className="btn btn-secondary text-primary border-primary" 
+                                onClick={() => setShowCreateGroup(true)}
+                            >
+                                <UserPlus size={18} /> Create Group with {user.fullName}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

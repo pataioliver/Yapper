@@ -1,70 +1,86 @@
 import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import ChatHeader from "./ChatHeader";
+import GroupChatHeader from "./GroupChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import MessageReactions from "./MessageReactions";
 import { Reply } from "lucide-react";
 
-const ChatContainer = ({ openProfileModal }) => {
+const GroupChat = ({ openProfileModal }) => {
   const {
-    messages,
-    getMessages,
+    groupMessages,
+    getGroupMessages,
     isMessagesLoading,
-    selectedUser,
-    subscribeToMessages,
-    unsubscribeFromMessages,
+    selectedGroup,
+    subscribeToGroupMessages,
+    unsubscribeFromGroupMessages,
     setReplyingTo,
     isSidebarOpen,
-    addReaction,
+    addGroupReaction,
     users,
     replyingTo,
+    refreshGroupData,
   } = useChatStore();
+
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
-  const hasLoadedMessages = useRef(false);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
-  useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-      hasLoadedMessages.current = true;
-      subscribeToMessages();
-      setInitialScrollDone(false);
-    }
-    return () => {
-      unsubscribeFromMessages();
-      hasLoadedMessages.current = false;
-    };
-  }, [selectedUser?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  const currentGroupMessages =
+    selectedGroup && groupMessages[selectedGroup._id]
+      ? groupMessages[selectedGroup._id]
+      : [];
 
   useEffect(() => {
-    if (messageEndRef.current && messages.length && !initialScrollDone) {
+    if (selectedGroup?._id) {
+      getGroupMessages(selectedGroup._id);
+      subscribeToGroupMessages(selectedGroup._id);
+      setInitialScrollDone(false);
+      refreshGroupData(selectedGroup._id);
+    }
+    
+    return () => {
+      if (selectedGroup?._id) {
+        unsubscribeFromGroupMessages(selectedGroup?._id);
+      }
+    };
+  }, [
+    selectedGroup?._id,
+    getGroupMessages,
+    subscribeToGroupMessages,
+    unsubscribeFromGroupMessages,
+    refreshGroupData,
+  ]);
+
+  useEffect(() => {
+    if (messageEndRef.current && currentGroupMessages.length && !initialScrollDone) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
       setInitialScrollDone(true);
-    } else if (messageEndRef.current && messages.length && initialScrollDone) {
+    } else if (messageEndRef.current && currentGroupMessages.length && initialScrollDone) {
       const isAtBottom =
         messageEndRef.current.getBoundingClientRect().bottom <= window.innerHeight + 100;
       if (isAtBottom) {
         messageEndRef.current.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }, [messages, initialScrollDone]);
+  }, [currentGroupMessages, initialScrollDone]);
 
-  const handleReaction = (messageId, reaction) => addReaction(messageId, reaction);
+  const handleReaction = (messageId, reaction) => addGroupReaction(messageId, reaction);
   const handleReply = (message) => setReplyingTo(message);
-  const getQuotedMessage = (replyToId) => messages.find((msg) => msg._id === replyToId);
 
-  // Helper to get user display name by id
+  const getQuotedMessage = (replyToId) =>
+    currentGroupMessages.find((msg) => msg._id === replyToId);
+
   const getUserName = (userId) => {
     if (userId === authUser._id) return "You";
+    const member = selectedGroup.members.find((m) => m._id === userId);
+    if (member) return member.fullName;
     const user = users.find((u) => u._id === userId);
     return user ? user.fullName : "Unknown";
   };
 
-  // Helper to determine reply color for MessageInput
   const getReplyColor = () => {
     if (!replyingTo) return "primary";
     if (replyingTo.senderId === authUser._id) return "secondary";
@@ -73,26 +89,33 @@ const ChatContainer = ({ openProfileModal }) => {
 
   if (isMessagesLoading) {
     return (
-      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
-        <ChatHeader openProfileModal={openProfileModal} />
+      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassySlideIn glassmorphism-header`}>
+        <GroupChatHeader openProfileModal={openProfileModal} />
         <MessageSkeleton />
-        <MessageInput />
+        <MessageInput replyColor={getReplyColor()} isGroup={true} groupId={selectedGroup?._id} />
       </div>
     );
   }
 
   return (
-    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
-      <ChatHeader openProfileModal={openProfileModal} />
+    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassySlideIn glassmorphism-header`}>
+      <GroupChatHeader openProfileModal={openProfileModal} />
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 w-full custom-scrollbar">
-        {messages.length === 0 ? (
-          <div className="text-center py-8 text-quaternary-content/60">
-            No messages yet. Start a conversation!
+        {currentGroupMessages.length === 0 ? (
+          <div className="text-center py-8 text-quaternary-content/60 animate-fadeIn">
+            No messages yet in this group. Be the first to send a message!
           </div>
         ) : (
-          messages.map((message, idx) => {
+          currentGroupMessages.map((message, idx) => {
             const quotedMessage = message.replyToId ? getQuotedMessage(message.replyToId) : null;
-            const isOwnMessage = message.senderId === authUser._id;
+            const isOwnMessage =
+              message.senderId._id === authUser._id || message.senderId === authUser._id;
+            const sender =
+              typeof message.senderId === "object"
+                ? message.senderId
+                : users.find((u) => u._id === message.senderId) ||
+                selectedGroup.members.find((m) => m._id === message.senderId) ||
+                { fullName: "Unknown", profilePicture: "" };
             const actionColor = isOwnMessage ? "secondary" : "primary";
             const bubbleBg = isOwnMessage
               ? "bg-secondary/90 text-secondary-content backdrop-blur-md"
@@ -105,14 +128,19 @@ const ChatContainer = ({ openProfileModal }) => {
               : "shadow-[0_2px_16px_rgba(180,80,255,0.08)]";
             let quotedBg = "bg-primary/10 text-primary border-primary";
             let quotedText = "text-primary";
-            if (quotedMessage && quotedMessage.senderId === authUser._id) {
-              quotedBg = "bg-secondary/10 text-secondary border-secondary";
-              quotedText = "text-secondary";
+            if (quotedMessage) {
+              const quotedSenderId =
+                typeof quotedMessage.senderId === "object"
+                  ? quotedMessage.senderId._id
+                  : quotedMessage.senderId;
+              if (quotedSenderId === authUser._id) {
+                quotedBg = "bg-secondary/10 text-secondary border-secondary";
+                quotedText = "text-secondary";
+              }
             }
-
             return (
               <div
-                id={`msg-${message._id}`}
+                id={`group-msg-${message._id}`}
                 key={message._id}
                 className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group animate-fadeIn`}
                 style={{ animationDelay: "0.01s", animationFillMode: 'both' }}
@@ -121,19 +149,23 @@ const ChatContainer = ({ openProfileModal }) => {
               >
                 <div className="chat-image avatar">
                   <div className="w-10 h-10 rounded-full border border-base-300/50 overflow-hidden">
-                    <img
-                      src={
-                        isOwnMessage
-                          ? (authUser.profilePicture || authUser.profilePic || "/avatar.png")
-                          : (selectedUser.profilePicture || selectedUser.profilePic || "/avatar.png")
-                      }
-                      alt={isOwnMessage ? authUser.fullName : selectedUser.fullName}
-                      className="w-full h-full object-cover"
-                    />
+                    {(sender.profilePicture || sender.profilePic) ? (
+                      <img
+                        src={sender.profilePicture || sender.profilePic}
+                        alt={sender.fullName || "Unknown User"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src="/avatar.png"
+                        alt={sender.fullName || "Unknown User"}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="chat-header mb-1 opacity-75 text-sm">
-                  {isOwnMessage ? "You" : selectedUser.fullName}
+                  {isOwnMessage ? "You" : sender?.fullName || "Unknown User"}
                   <time className="text-xs opacity-75 ml-1">
                     {new Date(message.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -145,13 +177,12 @@ const ChatContainer = ({ openProfileModal }) => {
                   className={`chat-bubble rounded-2xl p-3 will-change-transform animation-gpu will-change-opacity animate-glassyPop overflow-hidden ${bubbleBg} ${bubbleBorder} ${bubbleShadow}`}
                   style={{ animationDelay: "0.01s", animationFillMode: 'both' }}
                 >
-                  {/* Quoted message */}
                   {quotedMessage && (
                     <div
                       className={`mb-3 p-2 rounded-lg text-sm border-l-4 ${quotedBg} hover:brightness-110 transition-all cursor-pointer`}
                       onClick={() => {
                         // Find and scroll to the original message
-                        const originalMsg = document.getElementById(`msg-${quotedMessage._id}`);
+                        const originalMsg = document.getElementById(`group-msg-${quotedMessage._id}`);
                         if (originalMsg) {
                           originalMsg.scrollIntoView({ behavior: "smooth", block: "center" });
                           originalMsg.classList.add("highlight-quoted");
@@ -162,18 +193,16 @@ const ChatContainer = ({ openProfileModal }) => {
                     >
                       <p className="font-medium flex items-center gap-1">
                         <Reply size={14} className="text-base-content/60" />
-                        {quotedMessage.senderId === authUser._id
-                          ? "You"
-                          : selectedUser.fullName}
+                        {getUserName(
+                          typeof quotedMessage.senderId === "object"
+                            ? quotedMessage.senderId._id
+                            : quotedMessage.senderId
+                        )}
                       </p>
                       <p className={`${quotedText} line-clamp-2`}>{quotedMessage.text}</p>
                     </div>
                   )}
-
-                  {/* Message text */}
                   <div>{message.text}</div>
-
-                  {/* Message image */}
                   {message.image && (
                     <div className="mt-2">
                       <img
@@ -226,7 +255,7 @@ const ChatContainer = ({ openProfileModal }) => {
                     reactions={message.reactions}
                     onReact={handleReaction}
                     isOwnMessage={isOwnMessage}
-                    forceColor={isOwnMessage ? "secondary" : "primary"}
+                    forceColor={actionColor}
                     show={hoveredMsgId === message._id}
                     displayMode="reactionButton"
                   />
@@ -255,9 +284,13 @@ const ChatContainer = ({ openProfileModal }) => {
         )}
         <div ref={messageEndRef} />
       </div>
-      <MessageInput replyColor={getReplyColor()} />
+      <MessageInput
+        replyColor={getReplyColor()}
+        isGroup={true}
+        groupId={selectedGroup?._id}
+      />
     </div>
   );
 };
 
-export default ChatContainer;
+export default GroupChat;

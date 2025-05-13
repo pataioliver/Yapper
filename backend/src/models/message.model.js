@@ -18,10 +18,12 @@ const messageSchema = new mongoose.Schema(
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-        },
+      // Only required if not a group message
+    },
     groupId: {
-            type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Group",
+      // Required if it's a group message
     },
     text: {
       type: String,
@@ -38,6 +40,14 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Validation: either receiverId or groupId must be present
+messageSchema.pre('validate', function(next) {
+  if (!this.receiverId && !this.groupId) {
+    this.invalidate('receiverId', 'Either receiverId or groupId must be provided');
+  }
+  next();
+});
 
 const Message = mongoose.model("Message", messageSchema);
 

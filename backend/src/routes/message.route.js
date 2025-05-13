@@ -7,9 +7,9 @@ const router = express.Router();
 router.get("/users", protectRoute, getUsersForSidebar);
 router.get("/:id", protectRoute, getMessages);
 
-router.post("/send/:id", protectRoute, sendMessage);
+// No multer! Accept JSON with base64 image string
+router.post("/:id", protectRoute, sendMessage);
 
-// Add reaction to a message
 router.post("/:messageId/reactions", protectRoute, addReaction);
 
 export default router;

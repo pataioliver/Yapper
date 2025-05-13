@@ -1,79 +1,75 @@
-import { X, ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { useState } from "react";
 
-const ChatHeader = ({ onProfileClick }) => {
-  const { selectedChat, setselectedChat, isSidebarOpen, setSidebarOpen } = useChatStore();
+const ChatHeader = ({ openProfileModal }) => {
+  const { selectedUser, setSelectedUser, isSidebarOpen, setSidebarOpen } = useChatStore();
   const { onlineUsers } = useAuthStore();
 
+  const handleCloseChat = () => {
+    // If sidebar is not open, open it first
+    if (!isSidebarOpen) {
+      setSidebarOpen(true);
+    }
+    setSelectedUser(null);
+  };
+
+  const handleViewProfile = () => {
+    openProfileModal("user", selectedUser);
+  };
+
   return (
-    <div className="p-4 border-b border-quaternary/20 h-20 flex items-center bg-base-100/60 backdrop-blur-2xl rounded-tl-none rounded-tr-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 animate-glassMorph glassmorphism-header">
+    <div className="p-4 border-b border-quaternary/20 h-16 flex items-center bg-base-100/70 backdrop-blur-2xl rounded-tl-none rounded-tr-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 animate-glassySlideIn glassmorphism-header">
       <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-4">
-          {selectedChat && !isSidebarOpen (
+        <div className="flex items-center gap-2">
+          {!isSidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2.5 bg-tertiary text-tertiary-content rounded-full shadow hover:opacity-80 transition-all duration-300 animate-bounceInScale border-2 border-tertiary-content"
+              className="p-1.5 bg-gradient-to-br from-secondary to-primary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-primary flex items-center justify-center animate-glassyPop"
               aria-label="Open sidebar"
+              style={{ minWidth: 32, minHeight: 32 }}
             >
-              <ChevronRight className="size-7 text-tertiary-content" />
+              <ChevronRight className="size-5" />
             </button>
           )}
-          {/* Clickable profile section */}
           <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={onProfileClick}
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={handleViewProfile}
           >
-            <div className="avatar relative">
-              <div className="size-12 rounded-full border-2 border-quaternary/50 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale">
+            <div className="avatar relative ml-1 animate-glassyPop">
+              <div className="size-10 rounded-full border-2 border-tertiary shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale">
                 <img
-                  src={
-                    selectedChat?.type === "user"
-                      ? selectedChat?.user?.profilePic || "/avatar.png"
-                      : selectedChat?.group?.avatar || "/group.png"
-                  }
-                  alt={
-                    selectedChat?.type === "user"
-                      ? selectedChat?.user?.fullName
-                      : selectedChat?.group?.name
-                  }
+                  src={selectedUser.profilePicture || "/avatar.png"}
+                  alt={selectedUser.fullName}
                   className="rounded-full"
                 />
               </div>
-              {selectedChat?.type === "user" && onlineUsers.includes(selectedChat?.user?._id) && (
-                <span className="absolute bottom-0 right-0 size-3.5 bg-green-500 rounded-full ring-2 ring-base-100/50 animate-pulseGlow"></span>
+              {onlineUsers.includes(selectedUser._id) && (
+                <span className="absolute bottom-0 right-0 size-2.5 bg-tertiary rounded-full ring-2 ring-base-100/50 animate-pulseGlow" />
               )}
             </div>
-            <div>
-              <h3 className="font-semibold text-lg text-base-content animate-gla</p>ssMorph">
-                {selectedChat?.type === "user"
-                  ? selectedChat?.user?.fullName
-                  : selectedChat?.group?.name}
+            <div className="ml-2">
+              <h3 className="font-semibold text-base text-base-content animate-glassMorph">
+                {selectedUser.fullName}
               </h3>
-              <p className="text-base text-quaternary-content/80 animate-glassMorph">
-                {selectedChat?.type === "user"
-                  ? onlineUsers.includes(selectedChat?.user?._id)
-                    ? "Online"
-                    : "Offline"
-                  : ""
-                }
+              <p className="text-xs text-quaternary-content/80 animate-glassMorph">
+                {onlineUsers.includes(selectedUser._id) ? (
+                  <span className="text-green-500 font-semibold animate-pulseGlow">Online</span>
+                ) : (
+                  <span className="text-gray-400">Offline</span>
+                )}
               </p>
             </div>
           </div>
-
-
-          <button
-            onClick={() => {
-              setselectedChat(null);
-              setSidebarOpen(true); // Open the sidebar
-            }}
-            className="p-2.5 bg-tertiary/15 backdrop-blur-2xl text-tertiary-content rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-tertiary/25 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500 animate-subtleScale"
-            aria-label="Close chat"
-          >
-            <X className="size-7 text-tertiary-content" />
-          </button>
         </div>
+        <button
+          onClick={handleCloseChat}
+          className="p-1.5 bg-gradient-to-br from-quaternary to-secondary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
+          aria-label="Close chat"
+          style={{ minWidth: 32, minHeight: 32 }}
+        >
+          <X className="size-5" />
+        </button>
       </div>
     </div>
   );

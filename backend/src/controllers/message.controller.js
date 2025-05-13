@@ -1,7 +1,6 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import Friendship from "../models/friendship.model.js";
-
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
@@ -19,7 +18,6 @@ export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
     const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
-
     res.status(200).json(filteredUsers);
   } catch (error) {
     console.error("Error in getUsersForSidebar: ", error.message);
@@ -48,20 +46,30 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, replyToId } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    const friends = await areUsersFriends(senderId, receiverId);
-    if (!friends) {
-      return res.status(403).json({ error: "You are not friends with this user." });
+    // Check if users are friends before allowing message
+    const areFriends = await areUsersFriends(senderId, receiverId);
+    if (!areFriends) {
+      return res.status(403).json({
+        error: "You can only send messages to your friends"
+      });
     }
 
-    let imageUrl;
-    if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+    let { text, replyToId, image } = req.body;
+
+    let imageUrl = null;
+    // If image is present as base64 string, upload to Cloudinary
+    if (image && image.startsWith("data:image")) {
+      const uploadRes = await cloudinary.uploader.upload(image, {
+        folder: "yapper/messages"
+      });
+      imageUrl = uploadRes.secure_url;
+    }
+
+    if (!text && !imageUrl) {
+      return res.status(400).json({ error: "Message cannot be empty" });
     }
 
     const newMessage = new Message({
@@ -69,20 +77,25 @@ export const sendMessage = async (req, res) => {
       receiverId,
       text,
       image: imageUrl,
-      replyToId: replyToId || null,
+      replyToId: replyToId || null
     });
 
-    await newMessage.save();
+    const savedMessage = await newMessage.save();
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
+    // Emit the new message via Socket.io
+    const receiverSocketId = getReceiverSocketId(receiverId.toString());
+    const senderSocketId = getReceiverSocketId(senderId.toString());
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+      io.to(receiverSocketId).emit("newMessage", savedMessage);
+    }
+    if (senderSocketId && senderSocketId !== receiverSocketId) {
+      io.to(senderSocketId).emit("newMessage", savedMessage);
     }
 
-    res.status(201).json(newMessage);
+    res.status(201).json(savedMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in sendMessage controller:", error.message);
+    res.status(500).json({ error: "Failed to send message" });
   }
 };
 
@@ -109,8 +122,8 @@ export const addReaction = async (req, res) => {
     await message.save();
 
     // Notify both sender and receiver if online
-    const receiverSocketId = getReceiverSocketId(message.receiverId.toString());
-    const senderSocketId = getReceiverSocketId(message.senderId.toString());
+    const receiverSocketId = getReceiverSocketId(message.receiverId?.toString());
+    const senderSocketId = getReceiverSocketId(message.senderId?.toString());
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("messageReaction", { messageId, emoji, userId });
     }

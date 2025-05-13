@@ -18,6 +18,27 @@ export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
+// Add this helper function to emit to a room except a specific socket
+export function emitToRoomExceptSender(roomId, eventName, data, senderSocketId) {
+  if (!roomId || !eventName || !data) return;
+  
+  if (senderSocketId) {
+    // Get all socket ids in the room
+    const roomSockets = io.sockets.adapter.rooms.get(roomId);
+    if (roomSockets) {
+      // Emit to each socket in the room except the sender
+      roomSockets.forEach(socketId => {
+        if (socketId !== senderSocketId) {
+          io.to(socketId).emit(eventName, data);
+        }
+      });
+    }
+  } else {
+    // If no sender socket ID, emit to the whole room
+    io.to(roomId).emit(eventName, data);
+  }
+}
+
 // used to store online users
 const userSocketMap = {}; // {userId: socketId}
 
@@ -25,7 +46,11 @@ io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
 
   const userId = socket.handshake.query.userId;
-  if (userId) userSocketMap[userId] = socket.id;
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+    // Add user to their personal room for targeted messages
+    socket.join(`user:${userId}`);
+  }
 
   // io.emit() is used to send events to all the connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
@@ -33,20 +58,12 @@ io.on("connection", (socket) => {
   // --- GROUP CHAT  ---
   socket.on("join", ({ roomId }) => {
     socket.join(roomId);
-    // Optionally: console.log(`${userId} joined room ${roomId}`);
     console.log(`${userId} joined room ${roomId}`);
   });
 
   socket.on("leave", ({ roomId }) => {
     socket.leave(roomId);
-    // Optionally: console.log(`${userId} left room ${roomId}`);
     console.log(`${userId} left room ${roomId}`);
-  });
-
-  // Listen for group messages
-  socket.on("sendGroupMessage", ({ roomId, message }) => {
-    // Save message to DB here if needed
-    io.to(roomId).emit("newGroupMessage", message);
   });
 
   // --- DM Message ---

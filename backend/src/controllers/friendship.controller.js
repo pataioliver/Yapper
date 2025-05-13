@@ -111,26 +111,18 @@ export const getPendingRequests = async (req, res) => {
 };
 
 export const unfriend = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const { friendId } = req.body;
+  try {
+    const { friendshipId } = req.body;
+    if (!friendshipId) return res.status(400).json({ message: "Missing friendshipId" });
 
-        // Find the accepted friendship (in either direction)
-        const friendship = await Friendship.findOneAndDelete({
-            $or: [
-                { requester: userId, recipient: friendId, status: "accepted" },
-                { requester: friendId, recipient: userId, status: "accepted" },
-            ],
-        });
+    const friendship = await Friendship.findById(friendshipId);
+    if (!friendship) return res.status(404).json({ message: "Friendship not found" });
 
-        if (!friendship) {
-            return res.status(404).json({ error: "Friendship not found" });
-        }
-
-        res.json({ message: "Unfriended successfully" });
-    } catch (err) {
-        res.status(500).json({ error: "Internal server error" });
-    }
+    await friendship.deleteOne();
+    res.json({ message: "Unfriended successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to remove friend" });
+  }
 };
 
 export const getAllFriendships = async (req, res) => {
