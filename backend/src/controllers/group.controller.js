@@ -91,7 +91,7 @@ export const sendGroupMessage = async (req, res) => {
         // Send push notifications to group members (except sender)
         const sender = await User.findById(senderId).select('fullName');
         const memberIds = group.members.map(member => member._id.toString()).filter(id => id !== senderId.toString());
-        const subscriptions = await PushSubscription.find({ userId: { perspectivas: memberIds } });
+        const subscriptions = await PushSubscription.find({ userId: { $in: memberIds } });
         if (subscriptions.length) {
             const payload = JSON.stringify({
                 title: `New Message in ${group.name}`,
