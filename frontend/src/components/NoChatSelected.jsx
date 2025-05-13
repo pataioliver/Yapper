@@ -3,7 +3,7 @@ import { useChatStore } from "../store/useChatStore";
 import { useEffect, useState } from "react";
 
 const NoChatSelected = () => {
-  const { isSidebarOpen } = useChatStore();
+  const { isSidebarOpen, setSidebarOpen, selectedUser, selectedGroup } = useChatStore();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   useEffect(() => {
@@ -15,8 +15,15 @@ const NoChatSelected = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Don't render on mobile when sidebar is open
-  if (isMobile && isSidebarOpen) {
+  // Auto-open sidebar on mobile when no chat is selected
+  useEffect(() => {
+    if (isMobile && !selectedUser && !selectedGroup) {
+      setSidebarOpen(true);
+    }
+  }, [isMobile, selectedUser, selectedGroup, setSidebarOpen]);
+
+  // Don't render at all on mobile screens
+  if (isMobile) {
     return null;
   }
 
@@ -24,7 +31,7 @@ const NoChatSelected = () => {
   const rightRounding = 'rounded-r-2xl';
 
   return (
-    <div className={`w-full flex flex-1 flex-col items-center justify-center p-4 sm:p-8 md:p-16 bg-base-100/40 backdrop-blur-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph glassmorphism-header max-w-full ${leftRounding} ${rightRounding}`}>
+    <div className={`hidden sm:flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8 md:p-16 bg-base-100/40 backdrop-blur-2xl shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all duration-500 animate-glassMorph glassmorphism-header max-w-full ${leftRounding} ${rightRounding}`}>
       <div className="w-full max-w-md text-center space-y-6 relative">
         <div className="relative z-10">
           <div className="absolute inset-0 bg-gradient-radial from-tertiary/20 to-quaternary/10 rounded-full blur-2xl animate-pulseGlow opacity-50" />
