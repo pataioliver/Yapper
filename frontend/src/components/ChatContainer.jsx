@@ -110,7 +110,12 @@ const ChatContainer = ({ openProfileModal }) => {
   }
 
   return (
-    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header`}>
+    <div
+      className={`flex-1 flex flex-col bg-base-100/40 backdrop-blur-2xl w-full
+      shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500
+      ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header
+      overflow-y-auto max-h-[calc(100vh-8rem)] sm:max-h-none`}
+    >
       <ChatHeader openProfileModal={openProfileModal} />
       
       {/* Messages container */}
