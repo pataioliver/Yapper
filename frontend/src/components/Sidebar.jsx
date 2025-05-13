@@ -160,7 +160,6 @@ const Sidebar = ({ openProfileModal }) => {
             onClick={handleSidebarClose}
             className="p-1.5 ml-0.5 bg-gradient-to-br from-quaternary to-secondary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
             aria-label="Close sidebar"
-            style={{ minWidth: 32, minHeight: 32 }}
           >
             <ChevronLeft className="size-5" />
           </button>
@@ -178,8 +177,8 @@ const Sidebar = ({ openProfileModal }) => {
             <button
               onClick={() => setShowOnlineOnly(prev => !prev)}
               className={`relative flex items-center rounded-full transition-all duration-300 ${showOnlineOnly
-                  ? "bg-tertiary text-tertiary-content"
-                  : "bg-base-200/80 text-base-content/60"
+                ? "bg-tertiary text-tertiary-content"
+                : "bg-base-200/80 text-base-content/60"
                 } px-3 py-1 border border-quaternary/10 backdrop-blur-md animate-glassyPop`}
               style={{
                 boxShadow: showOnlineOnly
@@ -193,8 +192,8 @@ const Sidebar = ({ openProfileModal }) => {
               <div className={`relative w-8 h-4 rounded-full transition-colors duration-300 ${showOnlineOnly ? "bg-tertiary-content/30" : "bg-base-300/70"
                 }`}>
                 <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full transition-transform duration-300 ${showOnlineOnly
-                    ? "transform translate-x-4 bg-tertiary-content"
-                    : "bg-base-content/40"
+                  ? "transform translate-x-4 bg-tertiary-content"
+                  : "bg-base-content/40"
                   }`}></div>
               </div>
               <div className={`relative ml-2 size-2 rounded-full ${showOnlineOnly ? "bg-tertiary-content animate-pulse" : "hidden"
@@ -324,8 +323,8 @@ const Sidebar = ({ openProfileModal }) => {
                   <div
                     key={chat._id}
                     className={`p-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] ${selectedUser && selectedUser._id === chat._id
-                        ? "bg-secondary/30 shadow-lg border-secondary/40"
-                        : "hover:bg-base-200/60 bg-base-200/30"
+                      ? "bg-secondary/30 shadow-lg border-secondary/40"
+                      : "hover:bg-base-200/60 bg-base-200/30"
                       } animate-glassyPop backdrop-blur-md border border-quaternary/10 flex items-center`}
                     style={{
                       boxShadow: selectedUser && selectedUser._id === chat._id
@@ -506,8 +505,8 @@ const Sidebar = ({ openProfileModal }) => {
                   <div
                     key={group._id}
                     className={`p-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] ${selectedGroup && selectedGroup._id === group._id
-                        ? "bg-secondary/30 shadow-lg border-secondary/40"
-                        : "hover:bg-base-200/60 bg-base-200/30"
+                      ? "bg-secondary/30 shadow-lg border-secondary/40"
+                      : "hover:bg-base-200/60 bg-base-200/30"
                       } animate-glassyPop backdrop-blur-md border border-quaternary/10`}
                     style={{
                       boxShadow: selectedGroup && selectedGroup._id === group._id

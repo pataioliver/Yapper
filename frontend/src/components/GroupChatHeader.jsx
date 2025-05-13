@@ -24,31 +24,10 @@ const GroupChatHeader = ({ openProfileModal }) => {
           {!isSidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="glassmorphic-btn"
+              className="p-1.5 bg-gradient-to-tl from-secondary to-quaternary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
               aria-label="Open sidebar"
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                borderRadius: "50%",
-                width: "36px",
-                height: "36px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.25)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.15)";
-              }}
             >
-              <ChevronRight size={20} className="text-base-content" />
+              <ChevronRight className="size-5" />
             </button>
           )}
           <div
@@ -82,31 +61,10 @@ const GroupChatHeader = ({ openProfileModal }) => {
         </div>
         <button
           onClick={handleCloseGroupChat}
-          className="glassmorphic-btn"
+          className="p-1.5 bg-gradient-to-br from-quaternary to-secondary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
           aria-label="Close group chat"
-          style={{
-            background: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            borderRadius: "50%",
-            width: "36px",
-            height: "36px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)";
-            e.currentTarget.style.background = "rgba(255,255,255,0.25)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.background = "rgba(255,255,255,0.15)";
-          }}
         >
-          <X size={20} className="text-base-content" />
+          <X className="size-5" />
         </button>
       </div>
     </div>

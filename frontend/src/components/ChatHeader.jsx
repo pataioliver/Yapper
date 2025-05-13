@@ -25,9 +25,8 @@ const ChatHeader = ({ openProfileModal }) => {
           {!isSidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 bg-gradient-to-br from-secondary to-primary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-primary flex items-center justify-center animate-glassyPop"
+              className="p-1.5 bg-gradient-to-tl from-secondary to-quaternary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
               aria-label="Open sidebar"
-              style={{ minWidth: 32, minHeight: 32 }}
             >
               <ChevronRight className="size-5" />
             </button>
@@ -66,7 +65,6 @@ const ChatHeader = ({ openProfileModal }) => {
           onClick={handleCloseChat}
           className="p-1.5 bg-gradient-to-br from-quaternary to-secondary text-white rounded-full shadow hover:scale-105 hover:brightness-110 transition-all duration-300 border-2 border-quaternary flex items-center justify-center animate-glassyPop"
           aria-label="Close chat"
-          style={{ minWidth: 32, minHeight: 32 }}
         >
           <X className="size-5" />
         </button>
