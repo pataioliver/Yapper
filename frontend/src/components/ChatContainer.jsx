@@ -37,6 +37,9 @@ const ChatContainer = ({ openProfileModal }) => {
   const hasLoadedMessages = useRef(false);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
+  const leftRounding = isSidebarOpen ? 'rounded-l-none' : 'rounded-l-2xl';
+  const rightRounding = 'rounded-r-2xl';
+
   // Load messages when selected user changes and set up real-time subscription
   useEffect(() => {
     if (selectedUser?._id) {
@@ -98,7 +101,7 @@ const ChatContainer = ({ openProfileModal }) => {
   // Show loading skeleton while fetching messages
   if (isMessagesLoading) {
     return (
-      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
+      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header`}>
         <ChatHeader openProfileModal={openProfileModal} />
         <MessageSkeleton />
         <MessageInput />
@@ -107,7 +110,7 @@ const ChatContainer = ({ openProfileModal }) => {
   }
 
   return (
-    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassMorph glassmorphism-header`}>
+    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header`}>
       <ChatHeader openProfileModal={openProfileModal} />
       
       {/* Messages container */}

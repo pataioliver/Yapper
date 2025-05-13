@@ -20,7 +20,7 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   isGroupsLoading: false,
-  isSidebarOpen: window.innerWidth >= 1024,
+  isSidebarOpen: true, // Sidebar open by default on all screens
   replyingTo: null,
 
   fetchFriendshipData: async () => {

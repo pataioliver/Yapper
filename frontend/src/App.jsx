@@ -62,23 +62,31 @@ const App = () => {
       scope: baseUrl,
     };
 
+    // Remove any existing manifest links
+    document.querySelectorAll('link[rel="manifest"]').forEach(link => link.remove());
+
     // Create and apply dynamic manifest
     const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
     const manifestURL = URL.createObjectURL(blob);
-    const manifestLink = document.querySelector('link[rel="manifest"]') || document.createElement("link");
+    const manifestLink = document.createElement("link");
     manifestLink.rel = "manifest";
     manifestLink.href = manifestURL;
+    manifestLink.crossOrigin = "use-credentials"; // Optional, but recommended for PWA icons
     document.head.appendChild(manifestLink);
 
     // Apply theme color meta tag
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]') || document.createElement("meta");
-    themeColorMeta.setAttribute("name", "theme-color");
+    let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement("meta");
+      themeColorMeta.setAttribute("name", "theme-color");
+      document.head.appendChild(themeColorMeta);
+    }
     themeColorMeta.setAttribute("content", colors.theme_color);
-    document.head.appendChild(themeColorMeta);
 
-    // Clean up created object URLs
+    // Clean up created object URLs and manifest link
     return () => {
       URL.revokeObjectURL(manifestURL);
+      manifestLink.remove();
     };
   }, [theme, fontClass]);
 

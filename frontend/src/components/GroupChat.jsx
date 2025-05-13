@@ -86,9 +86,12 @@ const GroupChat = ({ openProfileModal }) => {
     return "primary";
   };
 
+  const leftRounding = isSidebarOpen ? 'rounded-l-none' : 'rounded-l-2xl';
+  const rightRounding = 'rounded-r-2xl';
+
   if (isMessagesLoading) {
     return (
-      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassySlideIn glassmorphism-header`}>
+      <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header`}>
         <GroupChatHeader openProfileModal={openProfileModal} />
         <MessageSkeleton />
         <MessageInput replyColor={getReplyColor()} isGroup={true} groupId={selectedGroup?._id} />
@@ -97,7 +100,7 @@ const GroupChat = ({ openProfileModal }) => {
   }
 
   return (
-    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${isSidebarOpen ? 'rounded-l-none rounded-r-2xl' : 'rounded-2xl'} animate-glassySlideIn glassmorphism-header`}>
+    <div className={`flex-1 flex flex-col overflow-auto bg-base-100/40 backdrop-blur-2xl w-full shadow-[0_0_25px_rgba(255,255,255,0.15)] transition-all duration-500 ${leftRounding} ${rightRounding} animate-glassySlideIn glassmorphism-header`}>
       <GroupChatHeader openProfileModal={openProfileModal} />
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 w-full custom-scrollbar">
         {currentGroupMessages.length === 0 ? (

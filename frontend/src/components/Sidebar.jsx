@@ -551,42 +551,42 @@ const Sidebar = ({ openProfileModal }) => {
 
       {/* User profile footer */}
       {authUser && (
-        <div className="p-5 border-t border-quaternary/10 bg-base-200/100 backdrop-blur-md">
-          <div className="flex items-center">
-            <div className="avatar">
-              <div className="w-10 h-10 rounded-full border-2 border-quaternary/20 overflow-hidden bg-base-300">
-                {/* Fixed profile picture display for current user */}
-                {authUser.profilePicture || authUser.profilePic ? (
-                  <img
-                    src={authUser.profilePicture || authUser.profilePic}
-                    alt={authUser.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src="/avatar.png"
-                    alt={authUser.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
+        <div
+          className="p-5 border-t border-quaternary/10 bg-base-200/100 backdrop-blur-md flex items-center min-h-[72px]"
+        >
+          <div className="avatar">
+            <div className="w-10 h-10 rounded-full border-2 border-quaternary/20 overflow-hidden bg-base-300">
+              {/* Fixed profile picture display for current user */}
+              {authUser.profilePicture || authUser.profilePic ? (
+                <img
+                  src={authUser.profilePicture || authUser.profilePic}
+                  alt={authUser.fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src="/avatar.png"
+                  alt={authUser.fullName}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
-            <div className="ml-3 flex-1 min-w-0">
-              <h4 className="font-medium text-base-content truncate max-w-[180px]">
-                {authUser.fullName}
-              </h4>
-              <p className="text-xs flex items-center gap-0.5">
-                <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                <span className="text-green-500">Online</span>
-              </p>
-            </div>
-            <button
-              onClick={() => openProfileModal("user", authUser)}
-              className="size-8 flex items-center justify-center rounded-full text-base-content/70 hover:bg-base-200 transition-all hover:text-secondary"
-            >
-              <UserRound size={18} />
-            </button>
           </div>
+          <div className="ml-3 flex-1 min-w-0">
+            <h4 className="font-medium text-base-content truncate max-w-[180px]">
+              {authUser.fullName}
+            </h4>
+            <p className="text-xs flex items-center gap-0.5">
+              <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              <span className="text-green-500">Online</span>
+            </p>
+          </div>
+          <button
+            onClick={() => openProfileModal("user", authUser)}
+            className="size-8 flex items-center justify-center rounded-full text-base-content/70 hover:bg-base-200 transition-all hover:text-secondary"
+          >
+            <UserRound size={18} />
+          </button>
         </div>
       )}
     </aside>
