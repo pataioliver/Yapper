@@ -45,6 +45,10 @@ A projekt kétféleképpen futtatható helyben:
 
 Ebben a módban a frontend és a backend külön szerveren fut, így gyorsabb a fejlesztés és a hibakeresés.
 
+**Fontos:**  
+A frontend és a backend indítása **két külön terminált vagy shellt igényel**!  
+Először indítsd el a backend-et, majd **nyiss egy új terminált**, és abban indítsd el a frontend-et.
+
 **Backend indítása:**
 ```bash
 cd backend
@@ -52,7 +56,7 @@ npm install
 npm run dev
 ```
 
-**Frontend indítása:**
+**Frontend indítása (új terminálban!):**
 ```bash
 cd ../frontend
 npm install
@@ -82,6 +86,33 @@ npm run start
 ```
 
 Ezután a teljes alkalmazás a backend szerveren keresztül lesz elérhető [http://localhost:5001](http://localhost:5001), a frontend statikus fájljait a backend szolgálja ki.
+
+---
+
+## Automata tesztek futtatása
+
+A projekt tartalmaz automata (Selenium alapú) végpont- és UI teszteket is, melyek a `frontend/tests` mappában találhatók.
+
+**Fontos:**  
+A tesztek futtatása **csak fejlesztői (dev) módban** lehetséges, mivel a backend ilyenkor adja vissza a teszteléshez szükséges extra adatokat (pl. verifikációs kód, jelszó reset link).
+
+### Tesztek futtatása
+
+1. Indítsd el a backend-et és a frontend-et **dev módban** (lásd fent).
+2. Egy másik terminálban navigálj a `frontend/tests` mappába, majd futtasd a kívánt tesztet például így:
+   ```bash
+   node signup.with_verification.test.js
+   ```
+   vagy
+   ```bash
+   node send_message.test.js
+   ```
+3. **Alternatívaként** a frontend mappában az összes tesztet lefuttathatod az alábbi paranccsal:
+   ```bash
+   npm run test
+   ```
+
+A tesztek csak akkor működnek helyesen, ha a környezet fejlesztői módban fut (`NODE_ENV=development`).
 
 ---
 
