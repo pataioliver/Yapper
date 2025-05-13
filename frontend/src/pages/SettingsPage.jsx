@@ -295,9 +295,10 @@ const SettingsPage = () => {
 
           {/* Notifications button moved below the title */}
           <div className="flex justify-center mb-6">
-            <button 
+            <button
               onClick={handleEnableNotifications}
-              className="btn" 
+              /* Added responsive padding & font size */
+              className="btn px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base transition-all duration-300"
               style={{
                 backgroundColor: THEME_COLORS[theme]?.secondary || "#4B5563",
                 color: THEME_COLORS[theme]?.secondaryContent || "#FFFFFF",
@@ -406,7 +407,8 @@ const SettingsPage = () => {
               <h3 className="text-2xl font-semibold text-base-content">Preview</h3>
               <button
                 onClick={handleApplyTheme}
-                className={`flex items-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-400 shadow-lg active:scale-95 animate-bounceInScale ${previewFontClass}`}
+                /* Added responsive padding & font size */
+                className={`flex items-center gap-2 rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg active:scale-95 animate-bounceInScale ${previewFontClass}`}
                 style={{
                   backgroundColor: previewSecondary,
                   color: previewSecondaryContent,
@@ -423,7 +425,7 @@ const SettingsPage = () => {
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1 animate-glassMorph flex flex-col items-center">
                 <div
-                  className="relative w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden border-8"
+                  className="relative w-full max-w-xs sm:w-80 h-[600px] rounded-[40px] shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden border-8 mx-auto"
                   style={{
                     background: "transparent",
                     borderColor: THEME_COLORS[previewTheme]?.secondary || '#6b7280'
@@ -451,7 +453,11 @@ const SettingsPage = () => {
                           );
                         })}
                       </div>
-                      <form className="relative flex items-end gap-1 mt-2 px-1 py-1 bg-base-100/90 rounded-b-2xl border-t border-quaternary/10">
+                      {/* Mobile preview form */}
+                      <form
+                        className="relative flex flex-wrap items-end gap-1 mt-2 px-1 py-1 bg-base-100/90 rounded-b-2xl border-t border-quaternary/10"
+                        style={{ minWidth: 0 }}
+                      >
                         <button
                           type="button"
                           className="btn btn-circle btn-xs btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
@@ -462,7 +468,7 @@ const SettingsPage = () => {
                         </button>
                         <input
                           type="text"
-                          className="flex-1 input input-xs input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          className="flex-1 min-w-0 input input-xs input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
                           placeholder="Type your message..."
                           disabled
                         />
@@ -483,7 +489,7 @@ const SettingsPage = () => {
 
               <div className="flex-1 animate-glassMorph flex flex-col items-center">
                 <div
-                  className="relative w-full max-w-md rounded-t-[20px] rounded-b-[6px] shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+                  className="relative w-full max-w-md rounded-t-[20px] rounded-b-[6px] shadow-[0_4px_30px_rgba(0,0,0,0.3)] mx-auto"
                   style={{
                     background: "transparent",
                     borderTopColor: THEME_COLORS[previewTheme]?.secondary || '#9ca3af',
@@ -526,7 +532,11 @@ const SettingsPage = () => {
                       })}
                     </div>
                     <div className="mt-4 relative animate-fadeIn">
-                      <form className="flex items-center gap-3">
+                      {/* Desktop preview form */}
+                      <form
+                        className="flex flex-wrap items-center gap-3"
+                        style={{ minWidth: 0 }}
+                      >
                         <button
                           type="button"
                           className="btn btn-circle btn-ghost bg-gradient-to-br from-tertiary to-quaternary text-white border-none shadow transition-all duration-300 flex items-center justify-center"
@@ -537,7 +547,7 @@ const SettingsPage = () => {
                         </button>
                         <input
                           type="text"
-                          className="flex-1 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
+                          className="flex-1 min-w-0 input input-bordered rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 bg-base-200/70 backdrop-blur-md shadow-inner placeholder:text-quaternary-content/60 transition-all duration-200"
                           placeholder="Type your message..."
                           disabled
                         />
